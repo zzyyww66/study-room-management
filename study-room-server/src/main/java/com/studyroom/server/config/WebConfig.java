@@ -22,7 +22,7 @@ public class WebConfig implements WebMvcConfigurer {
         logger.info("🔧 配置CORS跨域支持");
         
         registry.addMapping("/api/**")
-                .allowedOrigins("http://localhost:3000", "http://localhost:8081") // 允许前端访问
+                .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)

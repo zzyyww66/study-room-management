@@ -23,6 +23,7 @@ C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\s
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\entity\User.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\controller\SeatController.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\service\impl\SeatServiceImpl.java
+C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\config\GlobalExceptionHandler.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\controller\SimpleTestController.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\controller\AuthController.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\controller\TestController.java
