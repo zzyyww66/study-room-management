@@ -6,8 +6,10 @@ C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\s
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\entity\User.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\entity\Reservation.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\entity\StudyRoom.java
+C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\service\impl\SeatServiceImpl.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\controller\SimpleTestController.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\repository\UserRepository.java
+C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\service\impl\ReservationServiceImpl.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\config\DatabaseConfig.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\StudyRoomServerApplication.java
 C:\Users\zyw\Desktop\study-room-management\study-room-server\src\main\java\com\studyroom\server\service\ReservationService.java

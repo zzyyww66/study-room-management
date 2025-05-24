@@ -15,6 +15,7 @@ com\studyroom\server\entity\Reservation$PaymentStatus.class
 com\studyroom\server\service\impl\UserServiceImpl.class
 com\studyroom\server\controller\DataTestController.class
 com\studyroom\server\config\DatabaseConfig.class
+com\studyroom\server\service\impl\ReservationServiceImpl$1.class
 com\studyroom\server\entity\User$UserStatus.class
 com\studyroom\server\repository\StudyRoomRepository.class
 com\studyroom\server\entity\Reservation.class

@@ -2,8 +2,12 @@ package com.studyroom.server.controller;
 
 import com.studyroom.server.entity.User;
 import com.studyroom.server.entity.StudyRoom;
+import com.studyroom.server.entity.Seat;
+import com.studyroom.server.entity.Reservation;
 import com.studyroom.server.service.UserService;
 import com.studyroom.server.service.StudyRoomService;
+import com.studyroom.server.service.SeatService;
+import com.studyroom.server.service.ReservationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,245 +33,380 @@ public class SimpleTestController {
     
     @Autowired(required = false)
     private StudyRoomService studyRoomService;
+    
+    @Autowired(required = false)
+    private SeatService seatService;
+    
+    @Autowired(required = false)
+    private ReservationService reservationService;
 
     @GetMapping("/hello")
     public Map<String, Object> hello() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("message", "Hello from Study Room Server!");
-        result.put("timestamp", java.time.LocalDateTime.now());
-        result.put("userServiceExists", userService != null);
-        result.put("studyRoomServiceExists", studyRoomService != null);
-        return result;
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Hello from Study Room Management System!");
+        response.put("timestamp", java.time.LocalDateTime.now());
+        response.put("userServiceExists", userService != null);
+        response.put("studyRoomServiceExists", studyRoomService != null);
+        response.put("seatServiceExists", seatService != null);
+        response.put("reservationServiceExists", reservationService != null);
+        return response;
     }
-    
+
     @GetMapping("/status")
     public Map<String, Object> getStatus() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("server", "running");
-        result.put("services", "checking");
+        Map<String, Object> response = new HashMap<>();
+        response.put("serverStatus", "运行中");
         
         if (userService != null) {
             try {
-                int activeUsers = userService.findActiveUsers().size();
-                result.put("activeUsers", activeUsers);
-                result.put("userService", "OK");
+                List<User> activeUsers = userService.findActiveUsers();
+                response.put("userService", "OK - 找到 " + activeUsers.size() + " 个活跃用户");
             } catch (Exception e) {
-                result.put("userService", "ERROR: " + e.getMessage());
+                response.put("userService", "ERROR: " + e.getMessage());
             }
         } else {
-            result.put("userService", "NOT_INJECTED");
+            response.put("userService", "NOT_AVAILABLE");
         }
         
         if (studyRoomService != null) {
             try {
-                int availableRooms = studyRoomService.findAvailableRooms().size();
-                result.put("availableRooms", availableRooms);
-                result.put("studyRoomService", "OK");
+                List<StudyRoom> availableRooms = studyRoomService.findAvailableRooms();
+                response.put("studyRoomService", "OK - 找到 " + availableRooms.size() + " 个可用自习室");
             } catch (Exception e) {
-                result.put("studyRoomService", "ERROR: " + e.getMessage());
+                response.put("studyRoomService", "ERROR: " + e.getMessage());
             }
         } else {
-            result.put("studyRoomService", "NOT_INJECTED");
+            response.put("studyRoomService", "NOT_AVAILABLE");
         }
         
-        return result;
+        if (seatService != null) {
+            try {
+                List<Seat> availableSeats = seatService.findAvailableSeats();
+                response.put("seatService", "OK - 找到 " + availableSeats.size() + " 个可用座位");
+            } catch (Exception e) {
+                response.put("seatService", "ERROR: " + e.getMessage());
+            }
+        } else {
+            response.put("seatService", "NOT_AVAILABLE");
+        }
+        
+        if (reservationService != null) {
+            try {
+                List<Reservation> activeReservations = reservationService.findActiveReservations();
+                response.put("reservationService", "OK - 找到 " + activeReservations.size() + " 个活跃预订");
+            } catch (Exception e) {
+                response.put("reservationService", "ERROR: " + e.getMessage());
+            }
+        } else {
+            response.put("reservationService", "NOT_AVAILABLE");
+        }
+        
+        return response;
     }
 
-    /**
-     * 测试用户服务基本功能
-     */
+    @GetMapping("/health")
+    public Map<String, Object> health() {
+        Map<String, Object> response = new HashMap<>();
+        
+        boolean allServicesReady = userService != null && studyRoomService != null 
+                                 && seatService != null && reservationService != null;
+        
+        response.put("allServicesReady", allServicesReady);
+        response.put("userServiceReady", userService != null);
+        response.put("studyRoomServiceReady", studyRoomService != null);
+        response.put("seatServiceReady", seatService != null);
+        response.put("reservationServiceReady", reservationService != null);
+        response.put("status", allServicesReady ? "SUCCESS" : "PARTIAL");
+        
+        return response;
+    }
+
     @GetMapping("/users/basic")
     public Map<String, Object> testUserServiceBasic() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (userService == null) {
-            result.put("status", "ERROR");
-            result.put("message", "用户服务未注入");
-            return result;
+            response.put("error", "UserService 不可用");
+            return response;
         }
         
         try {
-            // 测试查找活跃用户
+            // 测试基本功能
             List<User> activeUsers = userService.findActiveUsers();
-            result.put("activeUsersCount", activeUsers.size());
+            response.put("activeUsersCount", activeUsers.size());
             
-            // 测试用户名可用性检查
-            boolean adminExists = !userService.isUsernameAvailable("admin");
-            result.put("adminUserExists", adminExists);
-            
-            // 测试邮箱可用性检查
-            boolean emailExists = !userService.isEmailAvailable("admin@studyroom.com");
-            result.put("adminEmailExists", emailExists);
-            
-            // 测试用户认证
+            // 测试认证
             User authenticatedUser = userService.authenticateUser("admin", "admin123");
-            result.put("adminAuthenticationSuccess", authenticatedUser != null);
+            response.put("adminAuthentication", authenticatedUser != null ? "成功" : "失败");
             
-            result.put("status", "SUCCESS");
-            result.put("message", "用户服务基本功能测试通过");
+            // 测试邮箱检查
+            boolean emailAvailable = userService.isEmailAvailable("test@example.com");
+            response.put("testEmailAvailable", emailAvailable);
             
+            response.put("status", "SUCCESS");
         } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("message", "用户服务测试失败: " + e.getMessage());
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
         }
         
-        return result;
+        return response;
     }
 
-    /**
-     * 测试用户统计功能
-     */
     @GetMapping("/users/{userId}/statistics")
     public Map<String, Object> testUserStatistics(@PathVariable Long userId) {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (userService == null) {
-            result.put("status", "ERROR");
-            result.put("message", "用户服务未注入");
-            return result;
+            response.put("error", "UserService 不可用");
+            return response;
         }
         
         try {
             Optional<User> userOpt = userService.findById(userId);
             if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                response.put("user", Map.of(
+                    "id", user.getId(),
+                    "username", user.getUsername(),
+                    "email", user.getEmail(),
+                    "role", user.getRole().toString(),
+                    "status", user.getStatus().toString()
+                ));
+                
                 Map<String, Object> stats = userService.getUserStatistics(userId);
-                result.put("userInfo", userOpt.get());
-                result.put("statistics", stats);
-                result.put("status", "SUCCESS");
+                response.put("statistics", stats);
+                response.put("status", "SUCCESS");
             } else {
-                result.put("status", "ERROR");
-                result.put("message", "用户不存在");
+                response.put("error", "用户不存在");
+                response.put("status", "NOT_FOUND");
             }
-            
         } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("message", "用户统计测试失败: " + e.getMessage());
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
         }
         
-        return result;
+        return response;
     }
 
-    /**
-     * 测试自习室服务基本功能
-     */
     @GetMapping("/studyrooms/basic")
     public Map<String, Object> testStudyRoomServiceBasic() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (studyRoomService == null) {
-            result.put("status", "ERROR");
-            result.put("message", "自习室服务未注入");
-            return result;
+            response.put("error", "StudyRoomService 不可用");
+            return response;
         }
         
         try {
-            // 测试查找可用自习室
+            // 测试基本功能
             List<StudyRoom> availableRooms = studyRoomService.findAvailableRooms();
-            result.put("availableRoomsCount", availableRooms.size());
+            response.put("availableRoomsCount", availableRooms.size());
             
-            // 测试按价格排序
+            // 测试排序功能
             List<StudyRoom> roomsByPrice = studyRoomService.findRoomsOrderByPrice(true);
-            result.put("roomsByPriceCount", roomsByPrice.size());
+            response.put("roomsByPriceCount", roomsByPrice.size());
             
-            // 测试按容量排序
             List<StudyRoom> roomsByCapacity = studyRoomService.findRoomsOrderByCapacity(false);
-            result.put("roomsByCapacityCount", roomsByCapacity.size());
+            response.put("roomsByCapacityCount", roomsByCapacity.size());
             
-            result.put("status", "SUCCESS");
-            result.put("message", "自习室服务基本功能测试通过");
-            
+            response.put("status", "SUCCESS");
         } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("message", "自习室服务测试失败: " + e.getMessage());
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
         }
         
-        return result;
+        return response;
     }
 
-    /**
-     * 测试自习室统计功能
-     */
     @GetMapping("/studyrooms/{roomId}/statistics")
     public Map<String, Object> testStudyRoomStatistics(@PathVariable Long roomId) {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (studyRoomService == null) {
-            result.put("status", "ERROR");
-            result.put("message", "自习室服务未注入");
-            return result;
+            response.put("error", "StudyRoomService 不可用");
+            return response;
         }
         
         try {
             Optional<StudyRoom> roomOpt = studyRoomService.findById(roomId);
             if (roomOpt.isPresent()) {
+                StudyRoom room = roomOpt.get();
+                response.put("studyRoom", Map.of(
+                    "id", room.getId(),
+                    "name", room.getName(),
+                    "capacity", room.getCapacity(),
+                    "hourlyRate", room.getHourlyRate(),
+                    "status", room.getStatus().toString()
+                ));
+                
                 Map<String, Object> stats = studyRoomService.getRoomStatistics(roomId);
-                result.put("roomInfo", roomOpt.get());
-                result.put("statistics", stats);
-                result.put("status", "SUCCESS");
+                response.put("statistics", stats);
+                response.put("status", "SUCCESS");
             } else {
-                result.put("status", "ERROR");
-                result.put("message", "自习室不存在");
+                response.put("error", "自习室不存在");
+                response.put("status", "NOT_FOUND");
             }
-            
         } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("message", "自习室统计测试失败: " + e.getMessage());
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
         }
         
-        return result;
+        return response;
     }
 
-    /**
-     * 测试自习室利用率统计
-     */
     @GetMapping("/studyrooms/utilization")
     public Map<String, Object> testStudyRoomUtilization() {
-        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         
         if (studyRoomService == null) {
-            result.put("status", "ERROR");
-            result.put("message", "自习室服务未注入");
-            return result;
+            response.put("error", "StudyRoomService 不可用");
+            return response;
         }
         
         try {
-            List<Map<String, Object>> utilizationStats = studyRoomService.getRoomsUtilizationStats();
-            result.put("utilizationStats", utilizationStats);
-            result.put("roomsCount", utilizationStats.size());
-            result.put("status", "SUCCESS");
-            result.put("message", "自习室利用率统计测试通过");
-            
+            List<Map<String, Object>> utilization = studyRoomService.getRoomsUtilizationStats();
+            response.put("utilization", utilization);
+            response.put("status", "SUCCESS");
         } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("message", "自习室利用率统计测试失败: " + e.getMessage());
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
         }
         
-        return result;
+        return response;
     }
 
-    /**
-     * Service层整体健康检查
-     */
-    @GetMapping("/health")
-    public Map<String, Object> serviceHealthCheck() {
-        Map<String, Object> result = new HashMap<>();
+    @GetMapping("/seats/basic")
+    public Map<String, Object> testSeatServiceBasic() {
+        Map<String, Object> response = new HashMap<>();
         
-        try {
-            boolean userServiceReady = userService != null;
-            boolean studyRoomServiceReady = studyRoomService != null;
-            
-            result.put("userServiceReady", userServiceReady);
-            result.put("studyRoomServiceReady", studyRoomServiceReady);
-            result.put("allServicesReady", userServiceReady && studyRoomServiceReady);
-            result.put("status", "SUCCESS");
-            result.put("message", "Service层健康检查通过");
-            result.put("timestamp", java.time.LocalDateTime.now());
-            
-        } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("message", "Service层健康检查失败: " + e.getMessage());
+        if (seatService == null) {
+            response.put("error", "SeatService 不可用");
+            return response;
         }
         
-        return result;
+        try {
+            // 测试基本功能
+            List<Seat> availableSeats = seatService.findAvailableSeats();
+            response.put("availableSeatsCount", availableSeats.size());
+            
+            // 测试特征筛选
+            List<Seat> windowSeats = seatService.findSeatsWithWindow();
+            response.put("windowSeatsCount", windowSeats.size());
+            
+            // 测试按类型查找
+            List<Seat> vipSeats = seatService.findSeatsByType(Seat.SeatType.VIP);
+            response.put("vipSeatsCount", vipSeats.size());
+            
+            response.put("status", "SUCCESS");
+        } catch (Exception e) {
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
+        }
+        
+        return response;
+    }
+
+    @GetMapping("/seats/{seatId}/statistics")
+    public Map<String, Object> testSeatStatistics(@PathVariable Long seatId) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (seatService == null) {
+            response.put("error", "SeatService 不可用");
+            return response;
+        }
+        
+        try {
+            Optional<Seat> seatOpt = seatService.findById(seatId);
+            if (seatOpt.isPresent()) {
+                Seat seat = seatOpt.get();
+                response.put("seat", Map.of(
+                    "id", seat.getId(),
+                    "seatNumber", seat.getSeatNumber(),
+                    "type", seat.getType().toString(),
+                    "status", seat.getStatus().toString(),
+                    "hasWindow", seat.getHasWindow(),
+                    "hasPowerOutlet", seat.getHasPowerOutlet(),
+                    "hasLamp", seat.getHasLamp()
+                ));
+                
+                Map<String, Object> stats = seatService.getSeatStatistics(seatId);
+                response.put("statistics", stats);
+                response.put("status", "SUCCESS");
+            } else {
+                response.put("error", "座位不存在");
+                response.put("status", "NOT_FOUND");
+            }
+        } catch (Exception e) {
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
+        }
+        
+        return response;
+    }
+
+    @GetMapping("/reservations/basic")
+    public Map<String, Object> testReservationServiceBasic() {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (reservationService == null) {
+            response.put("error", "ReservationService 不可用");
+            return response;
+        }
+        
+        try {
+            // 测试基本功能
+            List<Reservation> activeReservations = reservationService.findActiveReservations();
+            response.put("activeReservationsCount", activeReservations.size());
+            
+            // 测试今日预订
+            List<Reservation> todayReservations = reservationService.findTodayReservations();
+            response.put("todayReservationsCount", todayReservations.size());
+            
+            // 测试统计功能
+            Map<String, Object> systemStats = reservationService.getSystemReservationStatistics();
+            response.put("systemStatistics", systemStats);
+            
+            response.put("status", "SUCCESS");
+        } catch (Exception e) {
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
+        }
+        
+        return response;
+    }
+
+    @GetMapping("/reservations/{reservationId}/details")
+    public Map<String, Object> testReservationDetails(@PathVariable Long reservationId) {
+        Map<String, Object> response = new HashMap<>();
+        
+        if (reservationService == null) {
+            response.put("error", "ReservationService 不可用");
+            return response;
+        }
+        
+        try {
+            Optional<Reservation> reservationOpt = reservationService.findById(reservationId);
+            if (reservationOpt.isPresent()) {
+                Reservation reservation = reservationOpt.get();
+                response.put("reservation", Map.of(
+                    "id", reservation.getId(),
+                    "reservationCode", reservation.getReservationCode(),
+                    "status", reservation.getStatus().toString(),
+                    "paymentStatus", reservation.getPaymentStatus().toString(),
+                    "startTime", reservation.getStartTime(),
+                    "endTime", reservation.getEndTime(),
+                    "totalAmount", reservation.getTotalAmount()
+                ));
+                response.put("status", "SUCCESS");
+            } else {
+                response.put("error", "预订不存在");
+                response.put("status", "NOT_FOUND");
+            }
+        } catch (Exception e) {
+            response.put("error", e.getMessage());
+            response.put("status", "ERROR");
+        }
+        
+        return response;
     }
 } 
