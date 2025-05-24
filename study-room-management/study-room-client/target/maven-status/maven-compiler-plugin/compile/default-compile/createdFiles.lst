@@ -1,0 +1,3 @@
+com\studyroom\client\controller\MainController.class
+com\studyroom\client\StudyRoomClientApplication.class
+com\studyroom\client\service\HttpClientService.class
