@@ -1,1 +1,5 @@
+com\studyroom\server\config\WebConfig.class
+com\studyroom\server\util\ResponseUtil.class
+com\studyroom\server\controller\HealthController.class
 com\studyroom\server\StudyRoomServerApplication.class
+com\studyroom\server\config\DatabaseConfig.class
