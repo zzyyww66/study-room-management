@@ -1,0 +1,662 @@
+/*
+ * 苹果风格动画库 - Apple Design Language Animations
+ * @version 2.0.0 - 流畅动画与微动效果
+ */
+
+/* ===== 基础动画时间曲线 ===== */
+:root {
+  /* 苹果标准缓动曲线 */
+  -apple-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  -apple-ease-in: cubic-bezier(0.42, 0, 1, 1);
+  -apple-ease-out: cubic-bezier(0, 0, 0.58, 1);
+  -apple-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+
+  /* 弹性缓动 */
+  -apple-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  -apple-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* 动画时长 */
+  -animation-fast: 0.15s;
+  -animation-normal: 0.3s;
+  -animation-slow: 0.6s;
+}
+
+/* ===== 全局过渡效果 ===== */
+* {
+  -fx-transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* ===== 进入动画 ===== */
+
+/* 淡入效果 */
+@keyframes fadeIn {
+  from {
+    -fx-opacity: 0;
+  }
+  to {
+    -fx-opacity: 1;
+  }
+}
+
+.fade-in {
+  -fx-animation: fadeIn 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.fade-in-fast {
+  -fx-animation: fadeIn 0.15s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.fade-in-slow {
+  -fx-animation: fadeIn 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* 缩放进入 */
+@keyframes scaleIn {
+  from {
+    -fx-scale-x: 0.8;
+    -fx-scale-y: 0.8;
+    -fx-opacity: 0;
+  }
+  to {
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-opacity: 1;
+  }
+}
+
+.scale-in {
+  -fx-animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 弹性进入 */
+@keyframes bounceIn {
+  0% {
+    -fx-scale-x: 0.3;
+    -fx-scale-y: 0.3;
+    -fx-opacity: 0;
+  }
+  50% {
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
+    -fx-opacity: 0.8;
+  }
+  70% {
+    -fx-scale-x: 0.9;
+    -fx-scale-y: 0.9;
+    -fx-opacity: 1;
+  }
+  100% {
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-opacity: 1;
+  }
+}
+
+.bounce-in {
+  -fx-animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* 滑入动画 */
+@keyframes slideInUp {
+  from {
+    -fx-translate-y: 30;
+    -fx-opacity: 0;
+  }
+  to {
+    -fx-translate-y: 0;
+    -fx-opacity: 1;
+  }
+}
+
+.slide-in-up {
+  -fx-animation: slideInUp 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes slideInDown {
+  from {
+    -fx-translate-y: -30;
+    -fx-opacity: 0;
+  }
+  to {
+    -fx-translate-y: 0;
+    -fx-opacity: 1;
+  }
+}
+
+.slide-in-down {
+  -fx-animation: slideInDown 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes slideInLeft {
+  from {
+    -fx-translate-x: -30;
+    -fx-opacity: 0;
+  }
+  to {
+    -fx-translate-x: 0;
+    -fx-opacity: 1;
+  }
+}
+
+.slide-in-left {
+  -fx-animation: slideInLeft 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    -fx-translate-x: 30;
+    -fx-opacity: 0;
+  }
+  to {
+    -fx-translate-x: 0;
+    -fx-opacity: 1;
+  }
+}
+
+.slide-in-right {
+  -fx-animation: slideInRight 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* ===== 退出动画 ===== */
+
+/* 淡出效果 */
+@keyframes fadeOut {
+  from {
+    -fx-opacity: 1;
+  }
+  to {
+    -fx-opacity: 0;
+  }
+}
+
+.fade-out {
+  -fx-animation: fadeOut 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* 缩放退出 */
+@keyframes scaleOut {
+  from {
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-opacity: 1;
+  }
+  to {
+    -fx-scale-x: 0.8;
+    -fx-scale-y: 0.8;
+    -fx-opacity: 0;
+  }
+}
+
+.scale-out {
+  -fx-animation: scaleOut 0.2s cubic-bezier(0.42, 0, 1, 1);
+}
+
+/* ===== 交互动画 ===== */
+
+/* 悬停效果 */
+.hover-lift {
+  -fx-transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-lift:hover {
+  -fx-translate-y: -2;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.15), 20, 0, 0, 8);
+}
+
+.hover-scale {
+  -fx-transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-scale:hover {
+  -fx-scale-x: 1.05;
+  -fx-scale-y: 1.05;
+}
+
+.hover-glow {
+  -fx-transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.hover-glow:hover {
+  -fx-effect: dropshadow(gaussian, rgba(0, 122, 255, 0.4), 16, 0, 0, 0);
+}
+
+/* 按压效果 */
+.press-scale {
+  -fx-transition: all 0.1s cubic-bezier(0.42, 0, 1, 1);
+}
+
+.press-scale:pressed {
+  -fx-scale-x: 0.95;
+  -fx-scale-y: 0.95;
+}
+
+/* ===== 加载动画 ===== */
+
+/* 旋转动画 */
+@keyframes spin {
+  from {
+    -fx-rotate: 0deg;
+  }
+  to {
+    -fx-rotate: 360deg;
+  }
+}
+
+.spin {
+  -fx-animation: spin 1s linear infinite;
+}
+
+.spin-slow {
+  -fx-animation: spin 2s linear infinite;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0% {
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-opacity: 1;
+  }
+  50% {
+    -fx-scale-x: 1.1;
+    -fx-scale-y: 1.1;
+    -fx-opacity: 0.7;
+  }
+  100% {
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-opacity: 1;
+  }
+}
+
+.pulse {
+  -fx-animation: pulse 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* 呼吸灯效果 */
+@keyframes breathe {
+  0% {
+    -fx-opacity: 0.4;
+  }
+  50% {
+    -fx-opacity: 1;
+  }
+  100% {
+    -fx-opacity: 0.4;
+  }
+}
+
+.breathe {
+  -fx-animation: breathe 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* 跳动效果 */
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    -fx-translate-y: 0;
+  }
+  40%,
+  43% {
+    -fx-translate-y: -8;
+  }
+  70% {
+    -fx-translate-y: -4;
+  }
+  90% {
+    -fx-translate-y: -2;
+  }
+}
+
+.bounce {
+  -fx-animation: bounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+}
+
+/* ===== 摇摆动画 ===== */
+
+@keyframes shake {
+  0%,
+  100% {
+    -fx-translate-x: 0;
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    -fx-translate-x: -2;
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    -fx-translate-x: 2;
+  }
+}
+
+.shake {
+  -fx-animation: shake 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* 摆动效果 */
+@keyframes swing {
+  20% {
+    -fx-rotate: 15deg;
+  }
+  40% {
+    -fx-rotate: -10deg;
+  }
+  60% {
+    -fx-rotate: 5deg;
+  }
+  80% {
+    -fx-rotate: -5deg;
+  }
+  100% {
+    -fx-rotate: 0deg;
+  }
+}
+
+.swing {
+  -fx-animation: swing 1s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* ===== 闪烁动画 ===== */
+
+@keyframes flash {
+  0%,
+  50%,
+  100% {
+    -fx-opacity: 1;
+  }
+  25%,
+  75% {
+    -fx-opacity: 0.3;
+  }
+}
+
+.flash {
+  -fx-animation: flash 1s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* 高亮闪烁 */
+@keyframes highlightPulse {
+  0% {
+    -fx-background-color: rgba(0, 122, 255, 0.1);
+  }
+  50% {
+    -fx-background-color: rgba(0, 122, 255, 0.3);
+  }
+  100% {
+    -fx-background-color: rgba(0, 122, 255, 0.1);
+  }
+}
+
+.highlight-pulse {
+  -fx-animation: highlightPulse 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* ===== 翻转动画 ===== */
+
+@keyframes flipX {
+  from {
+    -fx-rotate: 0deg;
+  }
+  to {
+    -fx-rotate: 180deg;
+  }
+}
+
+.flip-x {
+  -fx-animation: flipX 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+@keyframes flipY {
+  from {
+    -fx-scale-y: 1;
+  }
+  50% {
+    -fx-scale-y: 0;
+  }
+  to {
+    -fx-scale-y: 1;
+  }
+}
+
+.flip-y {
+  -fx-animation: flipY 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* ===== 进度和状态动画 ===== */
+
+/* 加载条动画 */
+@keyframes progressMove {
+  0% {
+    -fx-translate-x: -100%;
+  }
+  100% {
+    -fx-translate-x: 100%;
+  }
+}
+
+.progress-loading {
+  -fx-animation: progressMove 1.5s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* 波浪动画 */
+@keyframes wave {
+  0% {
+    -fx-translate-y: 0;
+  }
+  50% {
+    -fx-translate-y: -4;
+  }
+  100% {
+    -fx-translate-y: 0;
+  }
+}
+
+.wave {
+  -fx-animation: wave 1s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+.wave-delay-1 {
+  -fx-animation: wave 1s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  -fx-animation-delay: 0.1s;
+}
+
+.wave-delay-2 {
+  -fx-animation: wave 1s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  -fx-animation-delay: 0.2s;
+}
+
+.wave-delay-3 {
+  -fx-animation: wave 1s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  -fx-animation-delay: 0.3s;
+}
+
+/* ===== 特殊效果动画 ===== */
+
+/* 打字效果 */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.typewriter {
+  -fx-animation: typewriter 2s cubic-bezier(0.25, 0.1, 0.25, 1);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* 粒子效果 */
+@keyframes sparkle {
+  0% {
+    -fx-opacity: 0;
+    -fx-scale-x: 0;
+    -fx-scale-y: 0;
+  }
+  50% {
+    -fx-opacity: 1;
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+  }
+  100% {
+    -fx-opacity: 0;
+    -fx-scale-x: 0;
+    -fx-scale-y: 0;
+  }
+}
+
+.sparkle {
+  -fx-animation: sparkle 1s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+}
+
+/* ===== 组合动画类 ===== */
+
+.smooth-appear {
+  -fx-animation: fadeIn 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+    slideInUp 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.attention-seeker {
+  -fx-animation: pulse 0.5s cubic-bezier(0.25, 0.1, 0.25, 1),
+    bounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) 0.2s;
+}
+
+.gentle-entrance {
+  -fx-animation: fadeIn 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+    scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* ===== 延迟动画 ===== */
+
+.delay-100 {
+  -fx-animation-delay: 0.1s;
+}
+
+.delay-200 {
+  -fx-animation-delay: 0.2s;
+}
+
+.delay-300 {
+  -fx-animation-delay: 0.3s;
+}
+
+.delay-500 {
+  -fx-animation-delay: 0.5s;
+}
+
+.delay-1000 {
+  -fx-animation-delay: 1s;
+}
+
+/* ===== 动画速度控制 ===== */
+
+.animate-faster {
+  -fx-animation-duration: 0.15s;
+}
+
+.animate-fast {
+  -fx-animation-duration: 0.3s;
+}
+
+.animate-normal {
+  -fx-animation-duration: 0.6s;
+}
+
+.animate-slow {
+  -fx-animation-duration: 1s;
+}
+
+.animate-slower {
+  -fx-animation-duration: 2s;
+}
+
+/* ===== 无限循环动画 ===== */
+
+.animate-infinite {
+  -fx-animation-iteration-count: infinite;
+}
+
+.animate-once {
+  -fx-animation-iteration-count: 1;
+}
+
+.animate-twice {
+  -fx-animation-iteration-count: 2;
+}
+
+/* ===== 动画播放控制 ===== */
+
+.animate-paused {
+  -fx-animation-play-state: paused;
+}
+
+.animate-running {
+  -fx-animation-play-state: running;
+}
+
+/* ===== 响应式动画 ===== */
+
+@media (max-width: 800px) {
+  /* 在小屏幕上减少动画时长 */
+  .fade-in,
+  .scale-in,
+  .slide-in-up,
+  .slide-in-down,
+  .slide-in-left,
+  .slide-in-right {
+    -fx-animation-duration: 0.2s;
+  }
+
+  /* 减少动画强度 */
+  .hover-scale:hover {
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
+  }
+
+  .hover-lift:hover {
+    -fx-translate-y: -1;
+  }
+}
+
+/* ===== 无障碍支持 ===== */
+
+/* 用户偏好减少动画时的处理 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    -fx-animation: none !important;
+    -fx-transition: none !important;
+  }
+
+  /* 保留基本的状态变化 */
+  .hover-scale:hover {
+    -fx-scale-x: 1.01;
+    -fx-scale-y: 1.01;
+  }
+}
+
+/* ===== 性能优化动画 ===== */
+
+/* GPU加速动画 */
+.gpu-accelerated {
+  -fx-effect: dropshadow(gaussian, transparent, 0, 0, 0, 0);
+}
+
+/* 高性能动画组合 */
+.performant-hover {
+  -fx-transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.performant-hover:hover {
+  -fx-scale-x: 1.05;
+  -fx-scale-y: 1.05;
+}

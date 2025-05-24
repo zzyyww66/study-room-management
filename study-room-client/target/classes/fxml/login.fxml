@@ -8,164 +8,171 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.studyroom.client.controller.LoginController">
    <center>
-      <GridPane alignment="CENTER" hgap="10.0" vgap="15.0" styleClass="login-container">
-         <columnConstraints>
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="100.0" prefWidth="150.0" />
-            <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="250.0" prefWidth="300.0" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-            <!-- 应用图标和标题 -->
-            <VBox alignment="CENTER" GridPane.columnSpan="2" GridPane.rowIndex="0">
-               <children>
-                  <ImageView fitHeight="80.0" fitWidth="80.0" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/app-icon.png" />
-                     </image>
-                  </ImageView>
-                  <Label styleClass="login-title" text="共享自习室管理系统">
-                     <font>
-                        <Font name="Microsoft YaHei" size="20.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Label styleClass="login-subtitle" text="请输入您的账号和密码">
-                     <font>
-                        <Font name="Microsoft YaHei" size="14.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="5.0" />
-                     </VBox.margin>
-                  </Label>
-               </children>
-               <GridPane.margin>
-                  <Insets bottom="20.0" />
-               </GridPane.margin>
-            </VBox>
-            
-            <!-- 用户名输入 -->
-            <Label text="用户名:" GridPane.rowIndex="1">
-               <font>
-                  <Font name="Microsoft YaHei" size="14.0" />
-               </font>
-            </Label>
-            <TextField fx:id="usernameField" promptText="请输入用户名" styleClass="login-field" GridPane.columnIndex="1" GridPane.rowIndex="1">
-               <font>
-                  <Font name="Microsoft YaHei" size="14.0" />
-               </font>
-            </TextField>
-            
-            <!-- 密码输入 -->
-            <Label text="密码:" GridPane.rowIndex="2">
-               <font>
-                  <Font name="Microsoft YaHei" size="14.0" />
-               </font>
-            </Label>
-            <PasswordField fx:id="passwordField" promptText="请输入密码" styleClass="login-field" GridPane.columnIndex="1" GridPane.rowIndex="2">
-               <font>
-                  <Font name="Microsoft YaHei" size="14.0" />
-               </font>
-            </PasswordField>
-            
-            <!-- 记住密码和自动登录 -->
-            <HBox spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-               <children>
-                  <CheckBox fx:id="rememberPasswordBox" styleClass="login-checkbox" text="记住密码">
-                     <font>
-                        <Font name="Microsoft YaHei" size="12.0" />
-                     </font>
-                  </CheckBox>
-                  <CheckBox fx:id="autoLoginBox" styleClass="login-checkbox" text="自动登录">
-                     <font>
-                        <Font name="Microsoft YaHei" size="12.0" />
-                     </font>
-                  </CheckBox>
-               </children>
-            </HBox>
-            
-            <!-- 登录按钮 -->
-            <Button fx:id="loginButton" defaultButton="true" maxWidth="1.7976931348623157E308" onAction="#handleLogin" styleClass="login-button" text="登录" GridPane.columnIndex="1" GridPane.rowIndex="4">
-               <font>
-                  <Font name="Microsoft YaHei" size="16.0" />
-               </font>
-               <GridPane.margin>
-                  <Insets top="10.0" />
-               </GridPane.margin>
-            </Button>
-            
-            <!-- 其他操作链接 -->
-            <HBox alignment="CENTER" spacing="20.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
-               <children>
-                  <Hyperlink fx:id="registerLink" onAction="#handleRegister" styleClass="login-link" text="注册新账号">
-                     <font>
-                        <Font name="Microsoft YaHei" size="12.0" />
-                     </font>
-                  </Hyperlink>
-                  <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPassword" styleClass="login-link" text="忘记密码">
-                     <font>
-                        <Font name="Microsoft YaHei" size="12.0" />
-                     </font>
-                  </Hyperlink>
-               </children>
-               <GridPane.margin>
-                  <Insets top="10.0" />
-               </GridPane.margin>
-            </HBox>
-            
-            <!-- 服务器设置 -->
-            <VBox GridPane.columnSpan="2" GridPane.rowIndex="6">
-               <children>
-                  <Separator>
-                     <VBox.margin>
-                        <Insets bottom="10.0" top="10.0" />
-                     </VBox.margin>
-                  </Separator>
-                  <HBox alignment="CENTER_LEFT" spacing="10.0">
-                     <children>
-                        <Label text="服务器地址:">
+      <!-- 可滚动的主容器 -->
+      <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="login-scroll-pane" 
+                  pannable="true" vvalue="0.0">
+         <content>
+            <VBox alignment="TOP_CENTER" spacing="0" styleClass="login-main-container" 
+                  minHeight="800" prefHeight="800">
+               
+               <!-- 顶部留白 -->
+               <Region prefHeight="60" />
+               
+               <!-- 登录卡片容器 -->
+               <VBox alignment="CENTER" spacing="32" styleClass="login-container" 
+                     maxWidth="480" prefWidth="480" minHeight="700">
+                  
+                  <!-- 顶部标题区域 -->
+                  <VBox alignment="CENTER" spacing="16" styleClass="login-header">
+                     <ImageView fitHeight="80" fitWidth="80" preserveRatio="true" styleClass="app-icon">
+                        <image>
+                           <Image url="@../images/app-icon.png" />
+                        </image>
+                     </ImageView>
+                     <VBox alignment="CENTER" spacing="8">
+                        <Label styleClass="login-title" text="共享自习室管理系统">
                            <font>
-                              <Font name="Microsoft YaHei" size="12.0" />
+                              <Font name="PingFang SC" size="32" />
                            </font>
                         </Label>
-                        <TextField fx:id="serverField" prefWidth="200.0" text="http://localhost:8080">
+                        <Label styleClass="login-subtitle" text="欢迎使用，请登录您的账户">
                            <font>
-                              <Font name="Microsoft YaHei" size="12.0" />
+                              <Font name="PingFang SC" size="16" />
+                           </font>
+                        </Label>
+                     </VBox>
+                  </VBox>
+                  
+                  <!-- 登录表单区域 -->
+                  <VBox spacing="24" styleClass="login-form" minWidth="400">
+                     
+                     <!-- 用户名输入组 -->
+                     <VBox spacing="8">
+                        <Label styleClass="form-label" text="用户名">
+                           <font>
+                              <Font name="PingFang SC" size="16" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="usernameField" promptText="请输入用户名" styleClass="login-field" prefHeight="48">
+                           <font>
+                              <Font name="PingFang SC" size="16" />
                            </font>
                         </TextField>
-                        <Button fx:id="testConnectionButton" onAction="#handleTestConnection" styleClass="secondary-button" text="测试连接">
+                     </VBox>
+                     
+                     <!-- 密码输入组 -->
+                     <VBox spacing="8">
+                        <Label styleClass="form-label" text="密码">
                            <font>
-                              <Font name="Microsoft YaHei" size="12.0" />
+                              <Font name="PingFang SC" size="16" />
                            </font>
-                        </Button>
-                     </children>
-                  </HBox>
-               </children>
+                        </Label>
+                        <PasswordField fx:id="passwordField" promptText="请输入密码" styleClass="login-field" prefHeight="48">
+                           <font>
+                              <Font name="PingFang SC" size="16" />
+                           </font>
+                        </PasswordField>
+                     </VBox>
+                     
+                     <!-- 选项区域 -->
+                     <HBox spacing="24" alignment="CENTER_LEFT">
+                        <CheckBox fx:id="rememberPasswordBox" styleClass="login-checkbox" text="记住密码">
+                           <font>
+                              <Font name="PingFang SC" size="14" />
+                           </font>
+                        </CheckBox>
+                        <CheckBox fx:id="autoLoginBox" styleClass="login-checkbox" text="自动登录">
+                           <font>
+                              <Font name="PingFang SC" size="14" />
+                           </font>
+                        </CheckBox>
+                     </HBox>
+                     
+                     <!-- 登录按钮 -->
+                     <Button fx:id="loginButton" defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" 
+                             styleClass="login-button" text="登录" prefHeight="48">
+                        <font>
+                           <Font name="PingFang SC" size="17" />
+                        </font>
+                     </Button>
+                     
+                     <!-- 链接区域 -->
+                     <HBox alignment="CENTER" spacing="32">
+                        <Hyperlink fx:id="registerLink" onAction="#handleRegister" styleClass="login-link" text="注册新账号">
+                           <font>
+                              <Font name="PingFang SC" size="14" />
+                           </font>
+                        </Hyperlink>
+                        <Hyperlink fx:id="forgotPasswordLink" onAction="#handleForgotPassword" styleClass="login-link" text="忘记密码">
+                           <font>
+                              <Font name="PingFang SC" size="14" />
+                           </font>
+                        </Hyperlink>
+                     </HBox>
+                     
+                  </VBox>
+                  
+                  <!-- 分隔线 -->
+                  <Separator styleClass="login-separator">
+                     <padding>
+                        <Insets left="20" right="20" />
+                     </padding>
+                  </Separator>
+                  
+                  <!-- 服务器设置区域 -->
+                  <VBox spacing="16" styleClass="server-settings" minWidth="400">
+                     <Label styleClass="section-title" text="服务器设置">
+                        <font>
+                           <Font name="PingFang SC" size="18" />
+                        </font>
+                     </Label>
+                     
+                     <VBox spacing="8">
+                        <Label styleClass="form-label" text="服务器地址">
+                           <font>
+                              <Font name="PingFang SC" size="14" />
+                           </font>
+                        </Label>
+                        <HBox spacing="12" alignment="CENTER_LEFT">
+                           <TextField fx:id="serverField" text="http://localhost:8080" styleClass="login-field" 
+                                    prefHeight="40" HBox.hgrow="ALWAYS">
+                              <font>
+                                 <Font name="PingFang SC" size="14" />
+                              </font>
+                           </TextField>
+                           <Button fx:id="testConnectionButton" onAction="#handleTestConnection" 
+                                 styleClass="secondary-button" text="测试连接" prefHeight="40">
+                              <font>
+                                 <Font name="PingFang SC" size="14" />
+                              </font>
+                           </Button>
+                        </HBox>
+                     </VBox>
+                  </VBox>
+                  
+                  <!-- 状态区域 -->
+                  <VBox alignment="CENTER" spacing="8" styleClass="status-area">
+                     <Label fx:id="statusLabel" styleClass="status-label" text="请输入用户名和密码">
+                        <font>
+                           <Font name="PingFang SC" size="13" />
+                        </font>
+                     </Label>
+                     
+                     <!-- 版本信息 -->
+                     <Label styleClass="version-info" text="v1.0.0 - Apple Design">
+                        <font>
+                           <Font name="PingFang SC" size="12" />
+                        </font>
+                     </Label>
+                  </VBox>
+                  
+               </VBox>
+               
+               <!-- 底部留白，确保在小屏幕上也有足够空间 -->
+               <Region prefHeight="60" />
+               
             </VBox>
-            
-            <!-- 状态信息 -->
-            <Label fx:id="statusLabel" styleClass="status-label" text="就绪" GridPane.columnSpan="2" GridPane.rowIndex="7">
-               <font>
-                  <Font name="Microsoft YaHei" size="12.0" />
-               </font>
-               <GridPane.margin>
-                  <Insets top="10.0" />
-               </GridPane.margin>
-            </Label>
-         </children>
-         <padding>
-            <Insets bottom="40.0" left="40.0" right="40.0" top="40.0" />
-         </padding>
-      </GridPane>
+         </content>
+      </ScrollPane>
    </center>
 </BorderPane> 
