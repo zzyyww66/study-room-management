@@ -1,0 +1,280 @@
+/* 仪表板界面样式 */
+
+/* 根容器 */
+.root {
+  -fx-font-family: "Microsoft YaHei", "SimSun", sans-serif;
+  -fx-background-color: #f8f9fa;
+}
+
+/* 头部容器 */
+.header-container {
+  -fx-background-color: white;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 1);
+}
+
+/* 标题栏 */
+.title-bar {
+  -fx-background-color: white;
+  -fx-border-color: transparent transparent #e9ecef transparent;
+  -fx-border-width: 0 0 1 0;
+}
+
+/* 应用标题 */
+.app-title {
+  -fx-text-fill: #2c3e50;
+  -fx-font-weight: bold;
+}
+
+/* 管理员徽章 */
+.admin-badge {
+  -fx-background-color: #dc3545;
+  -fx-text-fill: white;
+  -fx-background-radius: 12;
+  -fx-padding: 4 8;
+  -fx-font-size: 10px;
+}
+
+/* 状态指示器 */
+.status-indicator {
+  -fx-font-weight: bold;
+}
+
+/* 用户信息区域 */
+.user-info,
+.admin-info {
+  -fx-background-color: #f8f9fa;
+  -fx-background-radius: 8;
+  -fx-padding: 8;
+}
+
+.user-name,
+.admin-name {
+  -fx-text-fill: #2c3e50;
+  -fx-font-weight: bold;
+}
+
+.user-role,
+.admin-role {
+  -fx-text-fill: #6c757d;
+}
+
+/* 按钮样式 */
+.primary-button {
+  -fx-background-color: #007bff;
+  -fx-text-fill: white;
+  -fx-background-radius: 6;
+  -fx-padding: 10 20;
+  -fx-font-weight: bold;
+  -fx-cursor: hand;
+}
+
+.primary-button:hover {
+  -fx-background-color: #0056b3;
+}
+
+.secondary-button {
+  -fx-background-color: #6c757d;
+  -fx-text-fill: white;
+  -fx-background-radius: 6;
+  -fx-padding: 8 16;
+  -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+  -fx-background-color: #545b62;
+}
+
+.icon-button {
+  -fx-background-color: transparent;
+  -fx-text-fill: #6c757d;
+  -fx-background-radius: 6;
+  -fx-padding: 8 12;
+  -fx-cursor: hand;
+}
+
+.icon-button:hover {
+  -fx-background-color: #e9ecef;
+  -fx-text-fill: #495057;
+}
+
+/* 标签页样式 */
+.main-tabs .tab-pane .tab-header-area .tab-header-background {
+  -fx-background-color: white;
+}
+
+.main-tabs .tab {
+  -fx-background-color: transparent;
+  -fx-background-radius: 0;
+  -fx-padding: 12 20;
+}
+
+.main-tabs .tab:selected {
+  -fx-background-color: #007bff;
+}
+
+.main-tabs .tab .tab-label {
+  -fx-text-fill: #6c757d;
+  -fx-font-weight: bold;
+}
+
+.main-tabs .tab:selected .tab-label {
+  -fx-text-fill: white;
+}
+
+.admin-tabs .tab-pane .tab-header-area .tab-header-background {
+  -fx-background-color: #2c3e50;
+}
+
+.admin-tabs .tab {
+  -fx-background-color: transparent;
+  -fx-background-radius: 0;
+  -fx-padding: 12 20;
+}
+
+.admin-tabs .tab:selected {
+  -fx-background-color: #34495e;
+}
+
+.admin-tabs .tab .tab-label {
+  -fx-text-fill: #bdc3c7;
+  -fx-font-weight: bold;
+}
+
+.admin-tabs .tab:selected .tab-label {
+  -fx-text-fill: white;
+}
+
+/* 内容区域 */
+.tab-content {
+  -fx-background-color: #f8f9fa;
+  -fx-padding: 0;
+}
+
+/* 欢迎区域 */
+.welcome-section,
+.overview-section {
+  -fx-background-color: white;
+  -fx-background-radius: 8;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+}
+
+.welcome-title,
+.overview-title {
+  -fx-text-fill: #2c3e50;
+  -fx-font-weight: bold;
+}
+
+.welcome-subtitle,
+.overview-subtitle {
+  -fx-text-fill: #6c757d;
+}
+
+/* 统计卡片 */
+.stats-section {
+  -fx-padding: 0 20;
+}
+
+.stat-card {
+  -fx-background-color: white;
+  -fx-background-radius: 8;
+  -fx-padding: 20;
+  -fx-alignment: center;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+}
+
+.stat-title {
+  -fx-text-fill: #6c757d;
+  -fx-font-weight: bold;
+}
+
+.stat-value {
+  -fx-text-fill: #2c3e50;
+  -fx-font-weight: bold;
+}
+
+.stat-subtitle {
+  -fx-text-fill: #95a5a6;
+}
+
+/* 区域样式 */
+.recent-section,
+.activity-section {
+  -fx-background-color: white;
+  -fx-background-radius: 8;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.05), 3, 0, 0, 1);
+}
+
+.section-title {
+  -fx-text-fill: #2c3e50;
+  -fx-font-weight: bold;
+  -fx-padding: 0 0 15 0;
+}
+
+/* 表格样式 */
+.data-table {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+}
+
+.data-table .column-header-background {
+  -fx-background-color: #f8f9fa;
+}
+
+.data-table .column-header {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent transparent #dee2e6 transparent;
+  -fx-border-width: 0 0 1 0;
+}
+
+.data-table .column-header .label {
+  -fx-text-fill: #495057;
+  -fx-font-weight: bold;
+}
+
+.data-table .table-row-cell {
+  -fx-background-color: transparent;
+  -fx-border-color: transparent transparent #f1f3f4 transparent;
+  -fx-border-width: 0 0 1 0;
+}
+
+.data-table .table-row-cell:selected {
+  -fx-background-color: #e3f2fd;
+}
+
+.data-table .table-cell {
+  -fx-text-fill: #495057;
+  -fx-border-color: transparent;
+}
+
+/* 状态栏 */
+.status-bar {
+  -fx-background-color: white;
+  -fx-border-color: #e9ecef transparent transparent transparent;
+  -fx-border-width: 1 0 0 0;
+}
+
+.status-bar .label {
+  -fx-text-fill: #6c757d;
+}
+
+/* 加载样式 */
+.loading-pane {
+  -fx-background-color: rgba(255, 255, 255, 0.9);
+}
+
+.loading-text {
+  -fx-text-fill: #6c757d;
+  -fx-font-weight: bold;
+}
+
+.loading-mask {
+  -fx-background-color: rgba(0, 0, 0, 0.3);
+}
+
+.loading-content {
+  -fx-background-color: white;
+  -fx-background-radius: 10;
+  -fx-padding: 30;
+  -fx-alignment: center;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
+}

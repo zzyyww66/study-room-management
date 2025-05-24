@@ -12,6 +12,7 @@ com\studyroom\server\repository\UserRepository.class
 com\studyroom\server\service\impl\ReservationServiceImpl.class
 com\studyroom\server\config\WebConfig.class
 com\studyroom\server\service\ReservationService.class
+com\studyroom\server\config\GlobalExceptionHandler.class
 com\studyroom\server\controller\ServiceTestController.class
 com\studyroom\server\repository\SeatRepository.class
 com\studyroom\server\controller\TestController.class

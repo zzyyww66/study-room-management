@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.studyroom.client.controller.AdminDashboardController">
+   <top>
+      <!-- 顶部导航栏 -->
+      <VBox styleClass="header-container">
+         <!-- 标题栏 -->
+         <HBox alignment="CENTER_LEFT" styleClass="title-bar">
+            <children>
+               <!-- 应用图标和标题 -->
+               <HBox alignment="CENTER_LEFT" spacing="10.0">
+                  <children>
+                     <ImageView fitHeight="32.0" fitWidth="32.0" preserveRatio="true">
+                        <image>
+                           <Image url="@../images/app-icon.png" />
+                        </image>
+                     </ImageView>
+                     <Label styleClass="app-title" text="管理员控制台">
+                        <font>
+                           <Font name="Microsoft YaHei" size="18.0" />
+                        </font>
+                     </Label>
+                     <Label styleClass="admin-badge" text="管理员">
+                        <font>
+                           <Font name="Microsoft YaHei" size="12.0" />
+                        </font>
+                     </Label>
+                  </children>
+               </HBox>
+               
+               <!-- 右侧管理员信息 -->
+               <Region HBox.hgrow="ALWAYS" />
+               
+               <!-- 管理员信息区域 -->
+               <HBox alignment="CENTER_RIGHT" spacing="15.0">
+                  <children>
+                     <!-- 系统状态 -->
+                     <Label fx:id="systemStatusLabel" styleClass="status-indicator" text="● 系统正常">
+                        <font>
+                           <Font name="Microsoft YaHei" size="12.0" />
+                        </font>
+                     </Label>
+                     
+                     <!-- 管理员头像和信息 -->
+                     <HBox alignment="CENTER" spacing="8.0" styleClass="admin-info">
+                        <children>
+                           <ImageView fitHeight="24.0" fitWidth="24.0" preserveRatio="true">
+                              <image>
+                                 <Image url="@../images/admin-avatar.png" />
+                              </image>
+                           </ImageView>
+                           <VBox alignment="CENTER_LEFT">
+                              <children>
+                                 <Label fx:id="adminNameLabel" styleClass="admin-name" text="管理员">
+                                    <font>
+                                       <Font name="Microsoft YaHei" size="13.0" />
+                                    </font>
+                                 </Label>
+                                 <Label fx:id="adminRoleLabel" styleClass="admin-role" text="系统管理员">
+                                    <font>
+                                       <Font name="Microsoft YaHei" size="11.0" />
+                                    </font>
+                                 </Label>
+                              </children>
+                           </VBox>
+                        </children>
+                     </HBox>
+                     
+                     <!-- 操作按钮 -->
+                     <Button fx:id="systemSettingsButton" onAction="#handleSystemSettings" styleClass="icon-button" text="系统设置">
+                        <font>
+                           <Font name="Microsoft YaHei" size="12.0" />
+                        </font>
+                     </Button>
+                     <Button fx:id="logoutButton" onAction="#handleLogout" styleClass="secondary-button" text="注销">
+                        <font>
+                           <Font name="Microsoft YaHei" size="12.0" />
+                        </font>
+                     </Button>
+                  </children>
+               </HBox>
+            </children>
+            <padding>
+               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+            </padding>
+         </HBox>
+         
+         <!-- 管理导航标签页 -->
+         <TabPane fx:id="adminTabPane" styleClass="admin-tabs" tabClosingPolicy="UNAVAILABLE">
+            <tabs>
+               <!-- 系统概览 -->
+               <Tab text="系统概览">
+                  <content>
+                     <VBox styleClass="tab-content">
+                        <children>
+                           <!-- 系统状态概览 -->
+                           <HBox alignment="CENTER_LEFT" styleClass="overview-section">
+                              <children>
+                                 <VBox HBox.hgrow="ALWAYS">
+                                    <children>
+                                       <Label fx:id="systemOverviewLabel" styleClass="overview-title" text="系统运行状态">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="20.0" />
+                                          </font>
+                                       </Label>
+                                       <Label fx:id="systemStatusSubtitle" styleClass="overview-subtitle" text="所有服务运行正常">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="14.0" />
+                                          </font>
+                                          <VBox.margin>
+                                             <Insets top="5.0" />
+                                          </VBox.margin>
+                                       </Label>
+                                    </children>
+                                 </VBox>
+                                 
+                                 <!-- 快速管理操作 -->
+                                 <HBox spacing="10.0">
+                                    <children>
+                                       <Button fx:id="userManagementButton" onAction="#handleUserManagement" styleClass="primary-button" text="用户管理">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="14.0" />
+                                          </font>
+                                       </Button>
+                                       <Button fx:id="roomManagementButton" onAction="#handleRoomManagement" styleClass="secondary-button" text="自习室管理">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="14.0" />
+                                          </font>
+                                       </Button>
+                                    </children>
+                                 </HBox>
+                              </children>
+                              <padding>
+                                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                              </padding>
+                           </HBox>
+                           
+                           <!-- 系统统计卡片 -->
+                           <HBox spacing="20.0" styleClass="stats-section">
+                              <children>
+                                 <!-- 在线用户 -->
+                                 <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <children>
+                                       <Label styleClass="stat-title" text="在线用户">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="14.0" />
+                                          </font>
+                                       </Label>
+                                       <Label fx:id="onlineUsersLabel" styleClass="stat-value" text="0">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="24.0" />
+                                          </font>
+                                       </Label>
+                                       <Label styleClass="stat-subtitle" text="个用户">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="12.0" />
+                                          </font>
+                                       </Label>
+                                    </children>
+                                 </VBox>
+                                 
+                                 <!-- 总用户数 -->
+                                 <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <children>
+                                       <Label styleClass="stat-title" text="总用户数">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="14.0" />
+                                          </font>
+                                       </Label>
+                                       <Label fx:id="totalUsersLabel" styleClass="stat-value" text="0">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="24.0" />
+                                          </font>
+                                       </Label>
+                                       <Label styleClass="stat-subtitle" text="个用户">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="12.0" />
+                                          </font>
+                                       </Label>
+                                    </children>
+                                 </VBox>
+                                 
+                                 <!-- 活跃预约 -->
+                                 <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <children>
+                                       <Label styleClass="stat-title" text="活跃预约">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="14.0" />
+                                          </font>
+                                       </Label>
+                                       <Label fx:id="activeReservationsLabel" styleClass="stat-value" text="0">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="24.0" />
+                                          </font>
+                                       </Label>
+                                       <Label styleClass="stat-subtitle" text="个预约">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="12.0" />
+                                          </font>
+                                       </Label>
+                                    </children>
+                                 </VBox>
+                                 
+                                 <!-- 自习室利用率 -->
+                                 <VBox styleClass="stat-card" HBox.hgrow="ALWAYS">
+                                    <children>
+                                       <Label styleClass="stat-title" text="利用率">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="14.0" />
+                                          </font>
+                                       </Label>
+                                       <Label fx:id="utilizationRateLabel" styleClass="stat-value" text="0%">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="24.0" />
+                                          </font>
+                                       </Label>
+                                       <Label styleClass="stat-subtitle" text="座位利用率">
+                                          <font>
+                                             <Font name="Microsoft YaHei" size="12.0" />
+                                          </font>
+                                       </Label>
+                                    </children>
+                                 </VBox>
+                              </children>
+                              <padding>
+                                 <Insets bottom="20.0" left="20.0" right="20.0" />
+                              </padding>
+                           </HBox>
+                           
+                           <!-- 最近活动 -->
+                           <VBox styleClass="activity-section" VBox.vgrow="ALWAYS">
+                              <children>
+                                 <Label styleClass="section-title" text="最近活动">
+                                    <font>
+                                       <Font name="Microsoft YaHei" size="16.0" />
+                                    </font>
+                                 </Label>
+                                 <TableView fx:id="recentActivitiesTable" styleClass="data-table">
+                                    <columns>
+                                       <TableColumn fx:id="activityTimeColumn" prefWidth="120.0" text="时间" />
+                                       <TableColumn fx:id="activityUserColumn" prefWidth="100.0" text="用户" />
+                                       <TableColumn fx:id="activityTypeColumn" prefWidth="100.0" text="操作类型" />
+                                       <TableColumn fx:id="activityDescColumn" prefWidth="200.0" text="描述" />
+                                       <TableColumn fx:id="activityStatusColumn" prefWidth="80.0" text="状态" />
+                                    </columns>
+                                 </TableView>
+                              </children>
+                              <padding>
+                                 <Insets bottom="20.0" left="20.0" right="20.0" />
+                              </padding>
+                           </VBox>
+                        </children>
+                     </VBox>
+                  </content>
+               </Tab>
+               
+               <!-- 用户管理 -->
+               <Tab text="用户管理">
+                  <content>
+                     <StackPane fx:id="userManagementPane" styleClass="tab-content">
+                        <!-- 用户管理内容将在控制器中动态加载 -->
+                     </StackPane>
+                  </content>
+               </Tab>
+               
+               <!-- 自习室管理 -->
+               <Tab text="自习室管理">
+                  <content>
+                     <StackPane fx:id="roomManagementPane" styleClass="tab-content">
+                        <!-- 自习室管理内容将在控制器中动态加载 -->
+                     </StackPane>
+                  </content>
+               </Tab>
+               
+               <!-- 预约管理 -->
+               <Tab text="预约管理">
+                  <content>
+                     <StackPane fx:id="reservationManagementPane" styleClass="tab-content">
+                        <!-- 预约管理内容将在控制器中动态加载 -->
+                     </StackPane>
+                  </content>
+               </Tab>
+               
+               <!-- 统计报表 -->
+               <Tab text="统计报表">
+                  <content>
+                     <StackPane fx:id="statisticsPane" styleClass="tab-content">
+                        <!-- 统计报表内容将在控制器中动态加载 -->
+                     </StackPane>
+                  </content>
+               </Tab>
+               
+               <!-- 系统设置 -->
+               <Tab text="系统设置">
+                  <content>
+                     <StackPane fx:id="systemSettingsPane" styleClass="tab-content">
+                        <!-- 系统设置内容将在控制器中动态加载 -->
+                     </StackPane>
+                  </content>
+               </Tab>
+            </tabs>
+         </TabPane>
+      </VBox>
+   </top>
+   
+   <bottom>
+      <!-- 底部状态栏 -->
+      <HBox alignment="CENTER_LEFT" styleClass="status-bar">
+         <children>
+            <!-- 状态信息 -->
+            <Label fx:id="statusLabel" text="系统就绪">
+               <font>
+                  <Font name="Microsoft YaHei" size="12.0" />
+               </font>
+            </Label>
+            
+            <!-- 右侧信息 -->
+            <Region HBox.hgrow="ALWAYS" />
+            
+            <!-- 系统负载 -->
+            <Label fx:id="systemLoadLabel" text="负载: 正常">
+               <font>
+                  <Font name="Microsoft YaHei" size="12.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="15.0" />
+               </HBox.margin>
+            </Label>
+            
+            <!-- 服务器信息 -->
+            <Label fx:id="serverLabel" text="服务器: localhost:8080">
+               <font>
+                  <Font name="Microsoft YaHei" size="12.0" />
+               </font>
+               <HBox.margin>
+                  <Insets right="15.0" />
+               </HBox.margin>
+            </Label>
+            
+            <!-- 当前时间 -->
+            <Label fx:id="timeLabel" text="2024-05-23 16:00:00">
+               <font>
+                  <Font name="Microsoft YaHei" size="12.0" />
+               </font>
+            </Label>
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+         </padding>
+      </HBox>
+   </bottom>
+</BorderPane> 

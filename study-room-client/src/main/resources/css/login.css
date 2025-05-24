@@ -1,0 +1,146 @@
+/* 登录界面样式 */
+
+/* 根容器 */
+.root {
+  -fx-font-family: "Microsoft YaHei", "SimSun", sans-serif;
+  -fx-background-color: linear-gradient(to bottom, #f5f7fa, #c3cfe2);
+}
+
+/* 登录容器 */
+.login-container {
+  -fx-background-color: white;
+  -fx-background-radius: 10;
+  -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 2);
+  -fx-padding: 30;
+}
+
+/* 登录标题 */
+.login-title {
+  -fx-text-fill: #2c3e50;
+  -fx-font-weight: bold;
+}
+
+/* 登录副标题 */
+.login-subtitle {
+  -fx-text-fill: #7f8c8d;
+}
+
+/* 输入框样式 */
+.login-field {
+  -fx-background-color: #f8f9fa;
+  -fx-border-color: #e9ecef;
+  -fx-border-radius: 5;
+  -fx-background-radius: 5;
+  -fx-padding: 10;
+  -fx-font-size: 14px;
+}
+
+.login-field:focused {
+  -fx-border-color: #007bff;
+  -fx-background-color: white;
+}
+
+/* 复选框样式 */
+.login-checkbox {
+  -fx-text-fill: #6c757d;
+}
+
+.login-checkbox .box {
+  -fx-background-color: white;
+  -fx-border-color: #ced4da;
+  -fx-border-radius: 3;
+  -fx-background-radius: 3;
+}
+
+.login-checkbox:selected .box {
+  -fx-background-color: #007bff;
+  -fx-border-color: #007bff;
+}
+
+.login-checkbox:selected .mark {
+  -fx-background-color: white;
+}
+
+/* 登录按钮 */
+.login-button {
+  -fx-background-color: #007bff;
+  -fx-text-fill: white;
+  -fx-background-radius: 5;
+  -fx-padding: 12 20;
+  -fx-font-weight: bold;
+  -fx-cursor: hand;
+}
+
+.login-button:hover {
+  -fx-background-color: #0056b3;
+}
+
+.login-button:pressed {
+  -fx-background-color: #004085;
+}
+
+.login-button:disabled {
+  -fx-background-color: #6c757d;
+  -fx-cursor: default;
+}
+
+/* 次要按钮 */
+.secondary-button {
+  -fx-background-color: #6c757d;
+  -fx-text-fill: white;
+  -fx-background-radius: 5;
+  -fx-padding: 8 16;
+  -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+  -fx-background-color: #545b62;
+}
+
+.secondary-button:pressed {
+  -fx-background-color: #3d4449;
+}
+
+/* 链接样式 */
+.login-link {
+  -fx-text-fill: #007bff;
+  -fx-underline: false;
+}
+
+.login-link:hover {
+  -fx-text-fill: #0056b3;
+  -fx-underline: true;
+}
+
+.login-link:pressed {
+  -fx-text-fill: #004085;
+}
+
+/* 状态标签 */
+.status-label {
+  -fx-text-fill: #6c757d;
+}
+
+.status-normal {
+  -fx-text-fill: #28a745;
+}
+
+.status-error {
+  -fx-text-fill: #dc3545;
+}
+
+/* 分隔线 */
+.separator .line {
+  -fx-border-color: #e9ecef;
+}
+
+/* 标签样式 */
+.label {
+  -fx-text-fill: #495057;
+}
+
+/* 输入框标签 */
+.login-container .label {
+  -fx-font-weight: bold;
+  -fx-text-fill: #343a40;
+}

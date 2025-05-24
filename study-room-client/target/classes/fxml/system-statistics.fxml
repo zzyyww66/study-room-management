@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.chart.*?>
+
+<VBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.studyroom.client.controller.SystemStatisticsController">
+   <children>
+      <!-- 标题栏 -->
+      <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="header-bar">
+         <children>
+            <Label styleClass="page-title" text="系统统计">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS" />
+            <ComboBox fx:id="timePeriodComboBox" onAction="#handleTimePeriodChange" prefWidth="120.0" />
+            <Button fx:id="exportButton" mnemonicParsing="false" onAction="#handleExport" styleClass="secondary-button" text="导出报告" />
+            <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#handleRefresh" styleClass="refresh-button" text="刷新" />
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </HBox>
+
+      <!-- 关键指标卡片 -->
+      <GridPane hgap="20.0" vgap="20.0" styleClass="metrics-grid">
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" />
+            <ColumnConstraints hgrow="SOMETIMES" />
+            <ColumnConstraints hgrow="SOMETIMES" />
+            <ColumnConstraints hgrow="SOMETIMES" />
+         </columnConstraints>
+         <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" />
+            <RowConstraints vgrow="SOMETIMES" />
+         </rowConstraints>
+         <children>
+            <!-- 总预订数 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="0" GridPane.rowIndex="0">
+               <children>
+                  <Label styleClass="metric-icon" text="📊" />
+                  <Label fx:id="totalReservationsLabel" styleClass="metric-number" text="0">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="总预订数" />
+                  <Label fx:id="reservationsTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            
+            <!-- 总收入 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="1" GridPane.rowIndex="0">
+               <children>
+                  <Label styleClass="metric-icon" text="💰" />
+                  <Label fx:id="totalRevenueLabel" styleClass="metric-number" text="¥0">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="总收入" />
+                  <Label fx:id="revenueTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            
+            <!-- 活跃用户 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="2" GridPane.rowIndex="0">
+               <children>
+                  <Label styleClass="metric-icon" text="👥" />
+                  <Label fx:id="activeUsersLabel" styleClass="metric-number" text="0">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="活跃用户" />
+                  <Label fx:id="usersTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            
+            <!-- 座位利用率 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="3" GridPane.rowIndex="0">
+               <children>
+                  <Label styleClass="metric-icon" text="📈" />
+                  <Label fx:id="utilizationRateLabel" styleClass="metric-number" text="0%">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="座位利用率" />
+                  <Label fx:id="utilizationTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            
+            <!-- 平均使用时长 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="0" GridPane.rowIndex="1">
+               <children>
+                  <Label styleClass="metric-icon" text="⏱️" />
+                  <Label fx:id="avgDurationLabel" styleClass="metric-number" text="0h">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="平均使用时长" />
+                  <Label fx:id="durationTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            
+            <!-- 用户满意度 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <children>
+                  <Label styleClass="metric-icon" text="⭐" />
+                  <Label fx:id="satisfactionLabel" styleClass="metric-number" text="0.0">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="用户满意度" />
+                  <Label fx:id="satisfactionTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            
+            <!-- 取消率 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="2" GridPane.rowIndex="1">
+               <children>
+                  <Label styleClass="metric-icon" text="❌" />
+                  <Label fx:id="cancellationRateLabel" styleClass="metric-number" text="0%">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="预订取消率" />
+                  <Label fx:id="cancellationTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+            
+            <!-- 新用户增长 -->
+            <VBox alignment="CENTER" spacing="10.0" styleClass="metric-card" GridPane.columnIndex="3" GridPane.rowIndex="1">
+               <children>
+                  <Label styleClass="metric-icon" text="📊" />
+                  <Label fx:id="newUsersLabel" styleClass="metric-number" text="0">
+                     <font>
+                        <Font size="32.0" />
+                     </font>
+                  </Label>
+                  <Label styleClass="metric-label" text="新用户" />
+                  <Label fx:id="newUsersTrendLabel" styleClass="metric-trend" text="--" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+         </padding>
+      </GridPane>
+
+      <!-- 图表区域 -->
+      <TabPane VBox.vgrow="ALWAYS" styleClass="charts-tab-pane">
+         <tabs>
+            <!-- 预订趋势图 -->
+            <Tab closable="false" text="预订趋势">
+               <content>
+                  <VBox spacing="10.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label text="预订趋势分析" styleClass="chart-title" />
+                              <Region HBox.hgrow="ALWAYS" />
+                              <ComboBox fx:id="reservationChartTypeComboBox" prefWidth="120.0" />
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </padding>
+                        </HBox>
+                        <LineChart fx:id="reservationTrendChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis side="BOTTOM" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis side="LEFT" />
+                           </yAxis>
+                        </LineChart>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+            
+            <!-- 收入分析图 -->
+            <Tab closable="false" text="收入分析">
+               <content>
+                  <VBox spacing="10.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label text="收入分析" styleClass="chart-title" />
+                              <Region HBox.hgrow="ALWAYS" />
+                              <ComboBox fx:id="revenueChartTypeComboBox" prefWidth="120.0" />
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </padding>
+                        </HBox>
+                        <BarChart fx:id="revenueChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <CategoryAxis side="BOTTOM" />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis side="LEFT" />
+                           </yAxis>
+                        </BarChart>
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+            
+            <!-- 使用统计图 -->
+            <Tab closable="false" text="使用统计">
+               <content>
+                  <VBox spacing="10.0">
+                     <children>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Label text="座位使用统计" styleClass="chart-title" />
+                              <Region HBox.hgrow="ALWAYS" />
+                              <ComboBox fx:id="usageChartTypeComboBox" prefWidth="120.0" />
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                           </padding>
+                        </HBox>
+                        <PieChart fx:id="usageChart" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+               </content>
+            </Tab>
+         </tabs>
+      </TabPane>
+
+      <!-- 底部状态栏 -->
+      <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="status-bar">
+         <children>
+            <Label fx:id="dataRangeLabel" text="数据范围: --" />
+            <Label fx:id="statusLabel" text="就绪" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="lastUpdateLabel" text="最后更新: --" />
+         </children>
+         <padding>
+            <Insets bottom="15.0" left="20.0" right="20.0" top="10.0" />
+         </padding>
+      </HBox>
+   </children>
+   <styleClass>system-statistics</styleClass>
+</VBox> 
