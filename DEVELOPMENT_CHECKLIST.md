@@ -41,7 +41,7 @@
 
 ## 🚀 接下来的开发步骤
 
-### 阶段一：项目基础搭建（预计 2-3 天）
+### 阶段一：项目基础搭建（✅ 已完成）
 
 #### 1.1 创建 Maven 多模块项目
 
@@ -90,11 +90,11 @@ mvn archetype:generate -DgroupId=com.studyroom -DartifactId=study-room-client
 
 #### 1.3 前端项目搭建
 
-- [ ] 配置 JavaFX 依赖
-- [ ] 创建主应用程序类
-- [ ] 配置 FXML 加载器
-- [ ] 创建基础资源目录结构
-- [ ] 配置 JavaFX Maven 插件
+- [x] 配置 JavaFX 依赖
+- [x] 创建主应用程序类
+- [x] 配置 FXML 加载器
+- [x] 创建基础资源目录结构
+- [x] 配置 JavaFX Maven 插件
 
 **关键配置：**
 
@@ -110,23 +110,115 @@ mvn archetype:generate -DgroupId=com.studyroom -DartifactId=study-room-client
 </dependency>
 ```
 
-### 阶段二：数据层开发（预计 2 天）
+### 阶段二：数据层开发（✅ 2.1 已完成 | ⏳ 进行中）
 
-#### 2.1 实体类创建
+#### 2.1 实体类创建 （✅ 已完成并测试通过）
 
-- [ ] 创建 User 实体类
-- [ ] 创建 StudyRoom 实体类
-- [ ] 创建 Seat 实体类
-- [ ] 创建 Reservation 实体类
-- [ ] 配置 JPA 注解和关系映射
+- [x] 创建 User 实体类
+- [x] 创建 StudyRoom 实体类
+- [x] 创建 Seat 实体类
+- [x] 创建 Reservation 实体类
+- [x] 配置 JPA 注解和关系映射
 
-#### 2.2 数据访问层
+**已完成的实体类：**
 
-- [ ] 创建 UserRepository 接口
-- [ ] 创建 StudyRoomRepository 接口
-- [ ] 创建 SeatRepository 接口
-- [ ] 创建 ReservationRepository 接口
-- [ ] 编写自定义查询方法
+- `User.java` - 用户实体，包含用户角色和状态枚举
+- `StudyRoom.java` - 自习室实体，包含房间状态枚举
+- `Seat.java` - 座位实体，包含座位类型和状态枚举
+- `Reservation.java` - 预订实体，包含预订状态和支付状态枚举
+
+**实体关系映射：**
+
+- User ←→ Reservation (一对多)
+- StudyRoom ←→ Seat (一对多)
+- Seat ←→ Reservation (一对多)
+
+**✅ 测试验证结果：**
+
+- ✅ Maven 编译成功
+- ✅ Spring Boot 应用启动成功 (端口 8080)
+- ✅ H2 数据库连接正常
+- ✅ 数据库表自动创建成功：
+  ```sql
+  - users (用户表) - 包含唯一约束
+  - study_rooms (自习室表)
+  - seats (座位表)
+  - reservations (预订表)
+  - 所有外键约束正确建立
+  ```
+- ✅ REST API 接口可访问：
+  - `GET /api/health` - 健康检查 ✅
+  - `GET /api/health/test` - 测试接口 ✅
+- ✅ H2 数据库控制台可访问：`/api/h2-console`
+
+**技术特点：**
+
+- 使用 javax.persistence (兼容 Spring Boot 2.7.14)
+- Hibernate 自动建表和关系映射
+- 枚举类型正确存储
+- 时间戳自动管理 (@CreationTimestamp, @UpdateTimestamp)
+
+#### 2.2 数据访问层（✅ 已完成并测试通过）
+
+- [x] 创建 UserRepository 接口
+- [x] 创建 StudyRoomRepository 接口
+- [x] 创建 SeatRepository 接口
+- [x] 创建 ReservationRepository 接口
+- [x] 编写自定义查询方法
+
+**已完成的 Repository 接口：**
+
+**1. UserRepository.java** - 用户数据访问接口
+
+- 基础 CRUD 操作（继承 JpaRepository）
+- 用户认证相关：`findByUsername()`, `findByUsernameAndPassword()`
+- 用户管理：`findByRole()`, `findByStatus()`, `findActiveUsers()`
+- 查询功能：模糊搜索、时间范围查询、重复检查
+- 统计功能：角色统计、存在性验证
+
+**2. StudyRoomRepository.java** - 自习室数据访问接口
+
+- 基础 CRUD 操作（继承 JpaRepository）
+- 状态查询：`findAvailableRooms()`, `findByStatus()`
+- 条件过滤：容量范围、价格范围、位置搜索
+- 时间查询：`findOpenAtTime()` - 查找指定时间开放的房间
+- 关联查询：`findRoomsWithAvailableSeats()` - 有可用座位的房间
+- 排序功能：按价格、容量排序
+
+**3. SeatRepository.java** - 座位数据访问接口
+
+- 基础 CRUD 操作（继承 JpaRepository）
+- 关联查询：根据自习室查找座位
+- 状态管理：`findAvailableSeats()`, `findByStatus()`
+- 特征过滤：窗户、电源、台灯等设施筛选
+- 复合查询：`findAvailableSeatsWithFeatures()` - 多条件座位筛选
+- 统计功能：座位数量统计、可用性检查
+
+**4. ReservationRepository.java** - 预订数据访问接口
+
+- 基础 CRUD 操作（继承 JpaRepository）
+- 核心业务：`findConflictingReservations()` - 冲突检测
+- 时间查询：今日预订、过期预订、即将到期预订
+- 用户相关：用户预订历史、有效预订统计
+- 支付管理：未支付预订查询
+- 统计分析：收入计算、消费统计
+- 冲突检查：`hasConflictingReservation()` - 时间冲突验证
+
+**✅ 技术特点：**
+
+- 继承 Spring Data JPA 的`JpaRepository<Entity, ID>`
+- 使用方法命名约定自动生成 SQL
+- 自定义 JPQL 查询（@Query 注解）
+- 参数化查询防止 SQL 注入（@Param 注解）
+- 复杂业务逻辑查询：时间冲突检测、条件组合筛选
+- 统计和聚合查询：COUNT、SUM 等
+
+**✅ 编译测试结果：**
+
+- ✅ Maven 编译成功 - 所有 Repository 接口语法正确
+- ✅ 13 个源文件编译通过
+- ✅ 依赖注入配置正确（@Repository 注解）
+- ✅ JPA 查询语法验证通过
 
 #### 2.3 数据库初始化
 

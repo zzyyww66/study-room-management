@@ -2,6 +2,8 @@ package com.studyroom.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +15,8 @@ import org.slf4j.LoggerFactory;
  * @since 2024
  */
 @SpringBootApplication
+@EnableJpaRepositories(basePackages = "com.studyroom.server.repository")
+@ComponentScan(basePackages = "com.studyroom.server")
 public class StudyRoomServerApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(StudyRoomServerApplication.class);
