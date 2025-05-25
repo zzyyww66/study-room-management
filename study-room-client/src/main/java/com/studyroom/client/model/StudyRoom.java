@@ -1,7 +1,11 @@
 package com.studyroom.client.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * 自习室模型类
@@ -10,6 +14,7 @@ import java.time.LocalDateTime;
  * @version 1.0.0
  * @since 2024
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StudyRoom {
 
     // 基本属性
@@ -18,22 +23,34 @@ public class StudyRoom {
     private String location;
     private String description;
     private Integer capacity;
-    private BigDecimal pricePerHour;
-    private String openTime;
-    private String closeTime;
+    private BigDecimal hourlyRate;  // 修改字段名以匹配后端和控制器
+    private BigDecimal pricePerHour; // 保留兼容性
+    
+    @JsonFormat(pattern = "HH:mm:ss")
+    private LocalTime openTime;  // 修改为LocalTime类型
+    
+    @JsonFormat(pattern = "HH:mm:ss")
+    private LocalTime closeTime; // 修改为LocalTime类型
+    
     private Status status;
     
     // 时间戳
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
+    private LocalDateTime createdAt;  // 修改字段名以匹配后端
+    private LocalDateTime updatedAt;  // 修改字段名以匹配后端
+    private LocalDateTime createTime; // 保留兼容性
+    private LocalDateTime updateTime; // 保留兼容性
 
     /**
      * 自习室状态枚举
      */
     public enum Status {
+        @com.fasterxml.jackson.annotation.JsonProperty("AVAILABLE")
         AVAILABLE("可用"),
+        @com.fasterxml.jackson.annotation.JsonProperty("OCCUPIED")
         OCCUPIED("占用"),
+        @com.fasterxml.jackson.annotation.JsonProperty("MAINTENANCE")
         MAINTENANCE("维护中"),
+        @com.fasterxml.jackson.annotation.JsonProperty("CLOSED")
         CLOSED("已关闭");
 
         private final String displayName;
@@ -51,14 +68,17 @@ public class StudyRoom {
     public StudyRoom() {
     }
 
-    public StudyRoom(String name, String location, Integer capacity, BigDecimal pricePerHour) {
+    public StudyRoom(String name, String location, Integer capacity, BigDecimal hourlyRate) {
         this.name = name;
         this.location = location;
         this.capacity = capacity;
-        this.pricePerHour = pricePerHour;
+        this.hourlyRate = hourlyRate;
+        this.pricePerHour = hourlyRate; // 同步设置
         this.status = Status.AVAILABLE;
-        this.createTime = LocalDateTime.now();
-        this.updateTime = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.createTime = this.createdAt; // 兼容性
+        this.updateTime = this.updatedAt; // 兼容性
     }
 
     // Getter 和 Setter 方法
@@ -102,27 +122,37 @@ public class StudyRoom {
         this.capacity = capacity;
     }
 
+    public BigDecimal getHourlyRate() {
+        return hourlyRate;
+    }
+
+    public void setHourlyRate(BigDecimal hourlyRate) {
+        this.hourlyRate = hourlyRate;
+        this.pricePerHour = hourlyRate; // 保持同步
+    }
+
     public BigDecimal getPricePerHour() {
-        return pricePerHour;
+        return pricePerHour != null ? pricePerHour : hourlyRate;
     }
 
     public void setPricePerHour(BigDecimal pricePerHour) {
         this.pricePerHour = pricePerHour;
+        this.hourlyRate = pricePerHour; // 保持同步
     }
 
-    public String getOpenTime() {
+    public LocalTime getOpenTime() {
         return openTime;
     }
 
-    public void setOpenTime(String openTime) {
+    public void setOpenTime(LocalTime openTime) {
         this.openTime = openTime;
     }
 
-    public String getCloseTime() {
+    public LocalTime getCloseTime() {
         return closeTime;
     }
 
-    public void setCloseTime(String closeTime) {
+    public void setCloseTime(LocalTime closeTime) {
         this.closeTime = closeTime;
     }
 
@@ -132,23 +162,44 @@ public class StudyRoom {
 
     public void setStatus(Status status) {
         this.status = status;
-        this.updateTime = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        this.updateTime = this.updatedAt; // 兼容性
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+        this.createTime = createdAt; // 兼容性
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+        this.updateTime = updatedAt; // 兼容性
     }
 
     public LocalDateTime getCreateTime() {
-        return createTime;
+        return createTime != null ? createTime : createdAt;
     }
 
     public void setCreateTime(LocalDateTime createTime) {
         this.createTime = createTime;
+        this.createdAt = createTime; // 保持同步
     }
 
     public LocalDateTime getUpdateTime() {
-        return updateTime;
+        return updateTime != null ? updateTime : updatedAt;
     }
 
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
+        this.updatedAt = updateTime; // 保持同步
     }
 
     // 业务方法
@@ -172,7 +223,7 @@ public class StudyRoom {
                 ", name='" + name + '\'' +
                 ", location='" + location + '\'' +
                 ", capacity=" + capacity +
-                ", pricePerHour=" + pricePerHour +
+                ", hourlyRate=" + hourlyRate +
                 ", status=" + status +
                 '}';
     }

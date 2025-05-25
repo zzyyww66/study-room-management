@@ -301,7 +301,7 @@ mvn archetype:generate -DgroupId=com.studyroom -DartifactId=study-room-client
 - ✅ 依赖注入配置正确（@Autowired 注解）
 - ✅ 事务管理配置正确（@Transactional 注解）
 
-#### 3.3 工具类开发（⏳ 待开发）
+#### 3.3 工具类开发（跳过）
 
 - [ ] 密码加密工具类
 - [ ] 日期时间工具类
@@ -312,49 +312,49 @@ mvn archetype:generate -DgroupId=com.studyroom -DartifactId=study-room-client
 
 #### 4.1 REST API 控制器
 
-- [ ] 创建 AuthController（认证相关）
-- [ ] 创建 UserController（用户管理）
-- [ ] 创建 StudyRoomController（自习室管理）
-- [ ] 创建 SeatController（座位管理）
-- [ ] 创建 ReservationController（预订管理）
-- [ ] 创建 StatisticsController（统计信息）
+- [x] 创建 AuthController（认证相关）
+- [x] 创建 UserController（用户管理）
+- [x] 创建 StudyRoomController（自习室管理）
+- [x] 创建 SeatController（座位管理）
+- [x] 创建 ReservationController（预订管理）
+- [x] 创建 StatisticsController（统计信息）
 
 #### 4.2 异常处理和验证
 
-- [ ] 创建全局异常处理器
-- [ ] 添加参数验证注解
-- [ ] 实现统一响应格式
-- [ ] 添加日志记录
+- [x] 创建全局异常处理器
+- [x] 添加参数验证注解
+- [x] 实现统一响应格式
+- [x] 添加日志记录
 
 #### 4.3 API 测试
 
-- [ ] 使用 Postman 测试所有 API 接口
-- [ ] 验证请求参数和响应格式
-- [ ] 测试异常情况处理
+- [x] 使用 Postman 测试所有 API 接口
+- [x] 验证请求参数和响应格式
+- [x] 测试异常情况处理
 
 ### 阶段五：前端界面开发（预计 4 天）
 
 #### 5.1 基础界面框架
 
-- [ ] 创建主窗口界面
-- [ ] 设计登录界面
-- [ ] 创建用户仪表板界面
-- [ ] 创建管理员仪表板界面
+- [x] 创建主窗口界面
+- [x] 设计登录界面
+- [x] 创建用户仪表板界面
+- [x] 创建管理员仪表板界面
 
 #### 5.2 核心功能界面
 
-- [ ] 自习室列表界面
-- [ ] 座位选择界面
-- [ ] 预订管理界面
-- [ ] 用户管理界面（管理员）
-- [ ] 系统统计界面（管理员）
+- [x] 自习室列表界面
+- [x] 座位选择界面
+- [x] 预订管理界面
+- [x] 用户管理界面（管理员）
+- [x] 系统统计界面（管理员）
 
 #### 5.3 界面美化和交互
 
-- [ ] 设计 CSS 样式文件
-- [ ] 添加图标和图片资源
-- [ ] 实现界面切换动画
-- [ ] 优化用户体验
+- [x] 设计 CSS 样式文件
+- [x] 添加图标和图片资源
+- [x] 实现界面切换动画
+- [x] 优化用户体验
 
 #### 5.4 前后端数据交互（✅ 已完成）
 

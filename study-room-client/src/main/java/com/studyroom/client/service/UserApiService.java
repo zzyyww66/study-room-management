@@ -274,6 +274,50 @@ public class UserApiService {
             });
     }
 
+    /**
+     * 更新用户个人资料
+     */
+    public CompletableFuture<Boolean> updateUserProfile(Long userId, String email, String phone, String realName) {
+        logger.info("📝 更新用户个人资料: ID={}", userId);
+        
+        Map<String, Object> profileData = new HashMap<>();
+        profileData.put("email", email);
+        profileData.put("phone", phone);
+        profileData.put("realName", realName);
+        
+        return httpClient.put("/users/" + userId + "/profile", profileData)
+            .thenApply(this::parseBooleanResponse)
+            .whenComplete((success, throwable) -> {
+                if (throwable == null && success) {
+                    logger.info("✅ 用户个人资料更新成功: ID={}", userId);
+                } else {
+                    logger.error("❌ 用户个人资料更新失败: ID={}, 错误={}", userId, 
+                        throwable != null ? throwable.getMessage() : "未知错误");
+                }
+            });
+    }
+
+    /**
+     * 更新用户状态
+     */
+    public CompletableFuture<Boolean> updateUserStatus(Long userId, User.Status status) {
+        logger.info("🔄 更新用户状态: ID={}, 状态={}", userId, status);
+        
+        Map<String, String> statusData = new HashMap<>();
+        statusData.put("status", status.name());
+        
+        return httpClient.put("/users/" + userId + "/status", statusData)
+            .thenApply(this::parseBooleanResponse)
+            .whenComplete((success, throwable) -> {
+                if (throwable == null && success) {
+                    logger.info("✅ 用户状态更新成功: ID={}, 状态={}", userId, status);
+                } else {
+                    logger.error("❌ 用户状态更新失败: ID={}, 状态={}, 错误={}", userId, status, 
+                        throwable != null ? throwable.getMessage() : "未知错误");
+                }
+            });
+    }
+
     // 私有辅助方法
 
     /**

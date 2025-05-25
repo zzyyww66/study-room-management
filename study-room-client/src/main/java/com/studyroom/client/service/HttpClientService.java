@@ -47,7 +47,15 @@ public class HttpClientService {
     private HttpClientService() {
         this.httpClient = HttpClients.createDefault();
         this.objectMapper = new ObjectMapper();
+        
+        // 配置Java时间模块
         this.objectMapper.registerModule(new JavaTimeModule());
+        
+        // 配置Jackson以处理枚举和未知字段
+        this.objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+        this.objectMapper.configure(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        this.objectMapper.configure(com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         
         logger.info("🔧 HTTP客户端服务初始化完成");
     }

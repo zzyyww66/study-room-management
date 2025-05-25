@@ -22,6 +22,7 @@
     <properties>
         <main-class>com.studyroom.client.StudyRoomClientApplication</main-class>
         <javafx.runtime.path>./javafx-runtime</javafx.runtime.path>
+        <jackson.version>2.15.2</jackson.version>
     </properties>
 
     <!-- 依赖配置 -->
@@ -42,6 +43,16 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
         </dependency>
 
         <!-- Jackson Java Time Module -->

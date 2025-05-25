@@ -126,99 +126,85 @@ public class AdminDashboardController implements Initializable {
      * 加载标签页内容
      */
     private void loadTabContents() {
+        // 单独加载每个模块，避免一个失败导致全部失败
         try {
-            // 加载用户管理页面
             loadUserManagement();
-            
-            // 恢复其他页面加载
-            loadRoomManagement();
-            loadReservationManagement();
-            loadStatistics();
-            loadSystemSettings();
-            
         } catch (Exception e) {
-            logger.error("❌ 加载标签页内容失败", e);
-            updateStatus("部分页面加载失败");
+            logger.error("❌❌❌ 加载用户管理模块严重失败", e);
+            addPlaceholderLabel(userManagementPane, "用户管理模块加载失败，请查看日志");
+        }
+        
+        try {
+            loadRoomManagement();
+        } catch (Exception e) {
+            logger.error("❌❌❌ 加载自习室管理模块严重失败", e);
+            addPlaceholderLabel(roomManagementPane, "自习室管理模块加载失败，请查看日志");
+        }
+        
+        try {
+            loadReservationManagement();
+        } catch (Exception e) {
+            logger.error("❌❌❌ 加载预约管理模块严重失败", e);
+            addPlaceholderLabel(reservationManagementPane, "预约管理模块加载失败，请查看日志");
+        }
+        
+        try {
+            loadStatistics();
+        } catch (Exception e) {
+            logger.error("❌❌❌ 加载统计报表模块严重失败", e);
+            addPlaceholderLabel(statisticsPane, "统计报表模块加载失败，请查看日志");
+        }
+        
+        try {
+            loadSystemSettings();
+        } catch (Exception e) {
+            logger.error("❌❌❌ 加载系统设置模块严重失败", e);
+            addPlaceholderLabel(systemSettingsPane, "系统设置模块加载失败，请查看日志");
         }
     }
 
     /**
      * 加载用户管理页面
      */
-    private void loadUserManagement() {
-        try {
-            logger.info("🔄 开始加载用户管理页面...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/user-management.fxml"));
-            logger.info("📄 FXML资源路径: {}", getClass().getResource("/fxml/user-management.fxml"));
-            
-            userManagementPane.getChildren().clear();
-            Object loadedContent = loader.load();
-            logger.info("✅ FXML内容加载成功，类型: {}", loadedContent.getClass().getName());
-            
-            userManagementPane.getChildren().add((javafx.scene.Node) loadedContent);
-            logger.info("✅ 用户管理页面加载成功");
-        } catch (IOException e) {
-            logger.error("❌ 加载用户管理页面失败 - IOException", e);
-            addPlaceholderLabel(userManagementPane, "用户管理页面加载失败: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("❌ 加载用户管理页面失败 - 其他异常", e);
-            addPlaceholderLabel(userManagementPane, "用户管理页面加载失败: " + e.getMessage());
-        }
+    private void loadUserManagement() throws IOException {
+        logger.info("🔄 开始加载用户管理页面...");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/user-management.fxml"));
+        userManagementPane.getChildren().clear();
+        userManagementPane.getChildren().add(loader.load());
+        logger.info("✅ 用户管理页面加载成功");
     }
 
     /**
      * 加载自习室管理页面
      */
-    private void loadRoomManagement() {
-        // 暂时显示占位符，自习室管理页面可以复用study-room-list.fxml
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/study-room-list.fxml"));
-            roomManagementPane.getChildren().clear();
-            roomManagementPane.getChildren().add(loader.load());
-            logger.info("✅ 自习室管理页面加载成功");
-        } catch (IOException e) {
-            logger.error("❌ 加载自习室管理页面失败", e);
-            addPlaceholderLabel(roomManagementPane, "自习室管理页面加载失败");
-        }
+    private void loadRoomManagement() throws IOException {
+        logger.info("🔄 开始加载自习室管理页面...");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin-room-management.fxml"));
+        roomManagementPane.getChildren().clear();
+        roomManagementPane.getChildren().add(loader.load());
+        logger.info("✅ 自习室管理页面加载成功");
     }
 
     /**
      * 加载预约管理页面
      */
-    private void loadReservationManagement() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/reservation-management.fxml"));
-            reservationManagementPane.getChildren().clear();
-            reservationManagementPane.getChildren().add(loader.load());
-            logger.info("✅ 预约管理页面加载成功");
-        } catch (IOException e) {
-            logger.error("❌ 加载预约管理页面失败", e);
-            addPlaceholderLabel(reservationManagementPane, "预约管理页面加载失败");
-        }
+    private void loadReservationManagement() throws IOException {
+        logger.info("🔄 开始加载预约管理页面...");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/reservation-management.fxml"));
+        reservationManagementPane.getChildren().clear();
+        reservationManagementPane.getChildren().add(loader.load());
+        logger.info("✅ 预约管理页面加载成功");
     }
 
     /**
      * 加载统计报表页面
      */
-    private void loadStatistics() {
-        try {
-            logger.info("🔄 开始加载统计报表页面...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/system-statistics.fxml"));
-            logger.info("📄 FXML资源路径: {}", getClass().getResource("/fxml/system-statistics.fxml"));
-            
-            statisticsPane.getChildren().clear();
-            Object loadedContent = loader.load();
-            logger.info("✅ FXML内容加载成功，类型: {}", loadedContent.getClass().getName());
-            
-            statisticsPane.getChildren().add((javafx.scene.Node) loadedContent);
-            logger.info("✅ 统计报表页面加载成功");
-        } catch (IOException e) {
-            logger.error("❌ 加载统计报表页面失败 - IOException", e);
-            addPlaceholderLabel(statisticsPane, "统计报表页面加载失败: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("❌ 加载统计报表页面失败 - 其他异常", e);
-            addPlaceholderLabel(statisticsPane, "统计报表页面加载失败: " + e.getMessage());
-        }
+    private void loadStatistics() throws IOException {
+        logger.info("🔄 开始加载统计报表页面...");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/system-statistics.fxml"));
+        statisticsPane.getChildren().clear();
+        statisticsPane.getChildren().add(loader.load());
+        logger.info("✅ 统计报表页面加载成功");
     }
 
     /**

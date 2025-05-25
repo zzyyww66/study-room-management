@@ -20,12 +20,11 @@ public class Reservation {
      * 预订状态枚举
      */
     public enum Status {
-        PENDING("待确认"),
-        CONFIRMED("已确认"),
-        ACTIVE("进行中"),
+        ACTIVE("已确认/进行中"),
         COMPLETED("已完成"),
         CANCELLED("已取消"),
-        EXPIRED("已过期");
+        EXPIRED("已过期"),
+        NO_SHOW("未到场");
 
         private final String displayName;
 
@@ -109,7 +108,7 @@ public class Reservation {
 
     // 默认构造函数
     public Reservation() {
-        this.status = Status.PENDING;
+        this.status = Status.ACTIVE;
         this.paymentStatus = PaymentStatus.UNPAID;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
@@ -260,11 +259,11 @@ public class Reservation {
 
     // 工具方法
     public boolean isPending() {
-        return status == Status.PENDING;
+        return status == Status.ACTIVE;
     }
 
     public boolean isConfirmed() {
-        return status == Status.CONFIRMED;
+        return status == Status.ACTIVE;
     }
 
     public boolean isActive() {

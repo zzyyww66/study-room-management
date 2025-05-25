@@ -41,6 +41,7 @@
       <TableView fx:id="reservationTableView" VBox.vgrow="ALWAYS">
          <columns>
             <TableColumn fx:id="idColumn" prefWidth="80.0" text="预订号" />
+            <TableColumn fx:id="userColumn" prefWidth="100.0" text="用户" />
             <TableColumn fx:id="roomColumn" prefWidth="120.0" text="自习室" />
             <TableColumn fx:id="seatColumn" prefWidth="80.0" text="座位" />
             <TableColumn fx:id="dateColumn" prefWidth="100.0" text="日期" />

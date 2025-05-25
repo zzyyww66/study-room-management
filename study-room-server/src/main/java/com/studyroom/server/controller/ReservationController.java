@@ -254,7 +254,7 @@ public class ReservationController {
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("reservations", reservationPage.getContent());
+            response.put("reservations", reservationPage.getContent().stream().map(this::createReservationResponse).toList());
             response.put("totalElements", reservationPage.getTotalElements());
             response.put("totalPages", reservationPage.getTotalPages());
             response.put("currentPage", page);
@@ -678,6 +678,55 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(createErrorResponse("获取收入统计失败: " + e.getMessage(), "GET_REVENUE_STATISTICS_ERROR"));
         }
+    }
+    
+    // 工具方法：创建预订响应对象（避免Hibernate序列化问题）
+    private Map<String, Object> createReservationResponse(Reservation reservation) {
+        Map<String, Object> reservationResponse = new HashMap<>();
+        reservationResponse.put("id", reservation.getId());
+        reservationResponse.put("reservationCode", reservation.getReservationCode());
+        reservationResponse.put("startTime", reservation.getStartTime());
+        reservationResponse.put("endTime", reservation.getEndTime());
+        reservationResponse.put("status", reservation.getStatus().toString());
+        reservationResponse.put("paymentStatus", reservation.getPaymentStatus().toString());
+        reservationResponse.put("totalAmount", reservation.getTotalAmount());
+        reservationResponse.put("notes", reservation.getNotes());
+        reservationResponse.put("createdAt", reservation.getCreatedAt());
+        reservationResponse.put("updatedAt", reservation.getUpdatedAt());
+        reservationResponse.put("checkInTime", reservation.getCheckInTime());
+        reservationResponse.put("checkOutTime", reservation.getCheckOutTime());
+        
+        // 手动添加用户信息，避免Hibernate代理问题
+        if (reservation.getUser() != null) {
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("id", reservation.getUser().getId());
+            userInfo.put("username", reservation.getUser().getUsername());
+            userInfo.put("realName", reservation.getUser().getRealName());
+            userInfo.put("email", reservation.getUser().getEmail());
+            reservationResponse.put("user", userInfo);
+        }
+        
+        // 手动添加座位信息，避免Hibernate代理问题
+        if (reservation.getSeat() != null) {
+            Map<String, Object> seatInfo = new HashMap<>();
+            seatInfo.put("id", reservation.getSeat().getId());
+            seatInfo.put("seatNumber", reservation.getSeat().getSeatNumber());
+            seatInfo.put("type", reservation.getSeat().getType().toString());
+            seatInfo.put("status", reservation.getSeat().getStatus().toString());
+            
+            // 如果座位有自习室信息，也添加进来
+            if (reservation.getSeat().getStudyRoom() != null) {
+                Map<String, Object> studyRoomInfo = new HashMap<>();
+                studyRoomInfo.put("id", reservation.getSeat().getStudyRoom().getId());
+                studyRoomInfo.put("name", reservation.getSeat().getStudyRoom().getName());
+                studyRoomInfo.put("location", reservation.getSeat().getStudyRoom().getLocation());
+                seatInfo.put("studyRoom", studyRoomInfo);
+            }
+            
+            reservationResponse.put("seat", seatInfo);
+        }
+        
+        return reservationResponse;
     }
     
     // 工具方法：创建错误响应

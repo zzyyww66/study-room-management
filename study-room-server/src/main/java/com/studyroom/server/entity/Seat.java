@@ -60,6 +60,7 @@ public class Seat {
     // 多个座位属于一个自习室
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_room_id", nullable = false)
+    @JsonIgnore  // 避免Hibernate懒加载序列化问题
     private StudyRoom studyRoom;
 
     // 一个座位可以有多个预订记录

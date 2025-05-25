@@ -396,7 +396,74 @@ public class UserManagementController implements Initializable {
      */
     private void handleEditUser(User user) {
         logger.info("✏️ 编辑用户: {}", user.getUsername());
-        AlertUtils.showInfo("编辑用户", "编辑用户功能正在开发中\n用户: " + user.getUsername());
+        
+        // 创建编辑对话框
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("编辑用户");
+        dialog.setHeaderText("编辑用户信息 - " + user.getUsername());
+        
+        // 创建表单
+        javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+        
+        TextField realNameField = new TextField(user.getRealName());
+        TextField emailField = new TextField(user.getEmail());
+        TextField phoneField = new TextField(user.getPhone());
+        ComboBox<String> statusComboBox = new ComboBox<>();
+        statusComboBox.getItems().addAll("ACTIVE", "INACTIVE", "BANNED");
+        statusComboBox.setValue(user.getStatus().name());
+        
+        grid.add(new Label("真实姓名:"), 0, 0);
+        grid.add(realNameField, 1, 0);
+        grid.add(new Label("邮箱:"), 0, 1);
+        grid.add(emailField, 1, 1);
+        grid.add(new Label("电话:"), 0, 2);
+        grid.add(phoneField, 1, 2);
+        grid.add(new Label("状态:"), 0, 3);
+        grid.add(statusComboBox, 1, 3);
+        
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        
+        // 处理结果
+        dialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                // 调用更新API
+                userApiService.updateUserProfile(user.getId(), 
+                    emailField.getText(), 
+                    phoneField.getText(), 
+                    realNameField.getText())
+                .thenCompose(success -> {
+                    if (success) {
+                        // 更新用户状态
+                        return userApiService.updateUserStatus(user.getId(), 
+                            User.Status.valueOf(statusComboBox.getValue()));
+                    }
+                    return CompletableFuture.completedFuture(false);
+                })
+                .thenAccept(success -> {
+                    Platform.runLater(() -> {
+                        if (success) {
+                            logger.info("✅ 用户更新成功: {}", user.getUsername());
+                            AlertUtils.showInfo("更新成功", "用户信息已更新");
+                            loadUsers(); // 重新加载数据
+                        } else {
+                            logger.error("❌ 用户更新失败: {}", user.getUsername());
+                            AlertUtils.showError("更新失败", "更新用户信息失败，请稍后重试");
+                        }
+                    });
+                })
+                .exceptionally(throwable -> {
+                    Platform.runLater(() -> {
+                        logger.error("❌ 更新用户API调用失败", throwable);
+                        AlertUtils.showError("更新失败", "更新用户时发生错误：\n" + throwable.getMessage());
+                    });
+                    return null;
+                });
+            }
+        });
     }
 
     /**

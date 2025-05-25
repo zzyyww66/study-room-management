@@ -166,8 +166,8 @@ public class StudyRoomListController implements Initializable {
             }
             
             // 设置开放时间
-            room.setOpenTime("08:00");
-            room.setCloseTime("22:00");
+            room.setOpenTime(LocalTime.parse("08:00"));
+            room.setCloseTime(LocalTime.parse("22:00"));
             
             rooms.add(room);
         }

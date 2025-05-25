@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * 自习室API服务类
@@ -334,16 +335,43 @@ public class StudyRoomApiService {
      */
     private PageData<StudyRoom> parseStudyRoomPageResponse(String jsonResponse) {
         try {
-            ApiResponse<PageData<StudyRoom>> response = objectMapper.readValue(jsonResponse, 
-                new TypeReference<ApiResponse<PageData<StudyRoom>>>() {});
+            logger.debug("🔄 解析自习室分页响应: {}", jsonResponse.substring(0, Math.min(200, jsonResponse.length())));
             
-            if (response.isSuccess()) {
-                return response.getData();
-            } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+            // 直接解析后端返回的实际格式
+            Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, Map.class);
+            
+            // 检查是否成功
+            Boolean success = (Boolean) responseMap.get("success");
+            if (success == null || !success) {
+                String message = (String) responseMap.getOrDefault("message", "未知错误");
+                throw new RuntimeException("API错误: " + message);
             }
+            
+            // 提取分页数据
+            List<Map<String, Object>> studyRoomsData = (List<Map<String, Object>>) responseMap.get("studyRooms");
+            Integer totalPages = (Integer) responseMap.get("totalPages");
+            Integer totalElements = (Integer) responseMap.get("totalElements");
+            Integer currentPage = (Integer) responseMap.get("currentPage");
+            
+            // 转换StudyRoom对象
+            List<StudyRoom> studyRooms = studyRoomsData.stream()
+                .map(data -> objectMapper.convertValue(data, StudyRoom.class))
+                .collect(java.util.stream.Collectors.toList());
+            
+            // 创建PageData对象
+            PageData<StudyRoom> pageData = new PageData<>();
+            pageData.setContent(studyRooms);
+            pageData.setTotalElements(totalElements != null ? totalElements.longValue() : 0L);
+            pageData.setTotalPages(totalPages != null ? totalPages : 0);
+            
+            logger.debug("✅ 分页数据解析成功: 当前页={}, 总页数={}, 总记录数={}, 当前页记录数={}", 
+                currentPage, totalPages, totalElements, studyRooms.size());
+            
+            return pageData;
+            
         } catch (Exception e) {
-            logger.error("❌ 解析自习室分页响应失败", e);
+            logger.error("❌ 解析自习室分页响应失败: {}", e.getMessage(), e);
+            logger.debug("原始响应: {}", jsonResponse);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }

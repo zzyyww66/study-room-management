@@ -262,7 +262,7 @@ public class SeatController {
             
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("seats", seatPage.getContent());
+            response.put("seats", seatPage.getContent().stream().map(this::createSeatResponse).toList());
             response.put("totalElements", seatPage.getTotalElements());
             response.put("totalPages", seatPage.getTotalPages());
             response.put("currentPage", page);
@@ -565,6 +565,33 @@ public class SeatController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(createErrorResponse("按座位号排序失败: " + e.getMessage(), "SORT_BY_SEAT_NUMBER_ERROR"));
         }
+    }
+    
+    // 工具方法：创建座位响应对象（避免Hibernate序列化问题）
+    private Map<String, Object> createSeatResponse(Seat seat) {
+        Map<String, Object> seatResponse = new HashMap<>();
+        seatResponse.put("id", seat.getId());
+        seatResponse.put("seatNumber", seat.getSeatNumber());
+        seatResponse.put("type", seat.getType().toString());
+        seatResponse.put("status", seat.getStatus().toString());
+        seatResponse.put("description", seat.getDescription());
+        seatResponse.put("equipment", seat.getEquipment());
+        seatResponse.put("hasWindow", seat.getHasWindow());
+        seatResponse.put("hasPowerOutlet", seat.getHasPowerOutlet());
+        seatResponse.put("hasLamp", seat.getHasLamp());
+        seatResponse.put("createdAt", seat.getCreatedAt());
+        seatResponse.put("updatedAt", seat.getUpdatedAt());
+        
+        // 手动添加自习室信息，避免Hibernate代理问题
+        if (seat.getStudyRoom() != null) {
+            Map<String, Object> studyRoomInfo = new HashMap<>();
+            studyRoomInfo.put("id", seat.getStudyRoom().getId());
+            studyRoomInfo.put("name", seat.getStudyRoom().getName());
+            studyRoomInfo.put("location", seat.getStudyRoom().getLocation());
+            seatResponse.put("studyRoom", studyRoomInfo);
+        }
+        
+        return seatResponse;
     }
     
     // 工具方法：创建错误响应

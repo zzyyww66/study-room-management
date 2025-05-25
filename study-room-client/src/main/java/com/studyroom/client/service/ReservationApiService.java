@@ -429,17 +429,60 @@ public class ReservationApiService {
      */
     private PageData<Reservation> parseReservationPageResponse(String jsonResponse) {
         try {
-            ApiResponse<PageData<Reservation>> response = objectMapper.readValue(jsonResponse, 
-                new TypeReference<ApiResponse<PageData<Reservation>>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
-            } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+            logger.debug("🔄 解析预订分页响应: {}", jsonResponse.substring(0, Math.min(200, jsonResponse.length())));
+
+            // 直接解析后端返回的实际格式 (类似StudyRoomApiService的修复)
+            Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, Map.class);
+
+            Boolean success = (Boolean) responseMap.get("success");
+            // 后端直接返回分页对象，不一定有success字段，但我们需要content列表
+            // if (success == null || !success) {
+            //     String message = (String) responseMap.getOrDefault("message", "未知API错误");
+            //     logger.error("API响应错误: {}", message);
+            //     throw new RuntimeException("API错误: " + message);
+            // }
+
+            List<Map<String, Object>> reservationsData = (List<Map<String, Object>>) responseMap.get("content"); // 后端Page对象通常用content
+            if (reservationsData == null) {
+                // 尝试另一种可能的key，如后端直接返回reservations数组
+                reservationsData = (List<Map<String, Object>>) responseMap.get("reservations");
+                if (reservationsData == null) {
+                     logger.warn("分页响应中未找到 'content' 或 'reservations' 预订列表");
+                     reservationsData = new java.util.ArrayList<>(); // 返回空列表避免NPE
+                }
             }
+
+            Integer totalPages = (Integer) responseMap.get("totalPages");
+            Long totalElements = null;
+            Object totalElementsObj = responseMap.get("totalElements");
+            if (totalElementsObj instanceof Integer) {
+                totalElements = ((Integer) totalElementsObj).longValue();
+            } else if (totalElementsObj instanceof Long) {
+                totalElements = (Long) totalElementsObj;
+            }
+            
+            // Integer currentPage = (Integer) responseMap.get("currentPage"); // Spring Page 是0-indexed, FXML通常1-indexed
+            // int number = responseMap.get("number") != null ? (Integer)responseMap.get("number") : 0;
+
+            List<Reservation> reservations = reservationsData.stream()
+                .map(data -> objectMapper.convertValue(data, Reservation.class))
+                .collect(java.util.stream.Collectors.toList());
+
+            PageData<Reservation> pageData = new PageData<>();
+            pageData.setContent(reservations);
+            pageData.setTotalElements(totalElements != null ? totalElements : 0L);
+            pageData.setTotalPages(totalPages != null ? totalPages : 0);
+            // pageData.setCurrentPage(number); // 如果需要当前页码
+
+            logger.debug("✅ 预订分页数据解析成功: 总页数={}, 总记录数={}, 当前页记录数={}",
+                totalPages, totalElements, reservations.size());
+
+            return pageData;
+
         } catch (Exception e) {
-            logger.error("❌ 解析预订分页响应失败", e);
-            throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
+            logger.error("❌ 解析预订分页响应失败: {}", e.getMessage(), e);
+            logger.debug("原始预订分页响应: {}", jsonResponse);
+            throw new RuntimeException("预订数据解析失败: " + e.getMessage(), e);
         }
     }
 

@@ -9,6 +9,8 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalTime;
+
 /**
  * 窗口管理工具类
  * 
@@ -93,8 +95,8 @@ public class WindowUtils {
         room.setLocation("1楼东侧");
         room.setPricePerHour(new java.math.BigDecimal("15.00"));
         room.setCapacity(50);
-        room.setOpenTime("08:00");
-        room.setCloseTime("22:00");
+        room.setOpenTime(LocalTime.parse("08:00"));
+        room.setCloseTime(LocalTime.parse("22:00"));
         room.setStatus(com.studyroom.client.model.StudyRoom.Status.AVAILABLE);
         return room;
     }
