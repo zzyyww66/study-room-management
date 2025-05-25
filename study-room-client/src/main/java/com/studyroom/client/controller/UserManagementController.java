@@ -1,17 +1,27 @@
 package com.studyroom.client.controller;
 
+import com.studyroom.client.model.User;
+import com.studyroom.client.model.PageData;
+import com.studyroom.client.service.ApiServiceManager;
+import com.studyroom.client.service.UserApiService;
 import com.studyroom.client.util.AlertUtils;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * 用户管理控制器
@@ -43,17 +53,17 @@ public class UserManagementController implements Initializable {
     @FXML private Button clearFiltersButton;
 
     // 用户表格
-    @FXML private TableView<?> userTableView;
-    @FXML private TableColumn<?, ?> idColumn;
-    @FXML private TableColumn<?, ?> usernameColumn;
-    @FXML private TableColumn<?, ?> realNameColumn;
-    @FXML private TableColumn<?, ?> emailColumn;
-    @FXML private TableColumn<?, ?> phoneColumn;
-    @FXML private TableColumn<?, ?> roleColumn;
-    @FXML private TableColumn<?, ?> statusColumn;
-    @FXML private TableColumn<?, ?> registerTimeColumn;
-    @FXML private TableColumn<?, ?> lastLoginColumn;
-    @FXML private TableColumn<?, ?> actionColumn;
+    @FXML private TableView<User> userTableView;
+    @FXML private TableColumn<User, Long> idColumn;
+    @FXML private TableColumn<User, String> usernameColumn;
+    @FXML private TableColumn<User, String> realNameColumn;
+    @FXML private TableColumn<User, String> emailColumn;
+    @FXML private TableColumn<User, String> phoneColumn;
+    @FXML private TableColumn<User, String> roleColumn;
+    @FXML private TableColumn<User, String> statusColumn;
+    @FXML private TableColumn<User, LocalDateTime> registerTimeColumn;
+    @FXML private TableColumn<User, LocalDateTime> lastLoginColumn;
+    @FXML private TableColumn<User, Void> actionColumn;
 
     // 分页控制
     @FXML private Button firstPageButton;
@@ -68,10 +78,20 @@ public class UserManagementController implements Initializable {
     @FXML private Label statusLabel;
     @FXML private Label lastUpdateLabel;
 
+    // 服务和数据
+    private final UserApiService userApiService;
+    private final ObservableList<User> userList = FXCollections.observableArrayList();
+    
     // 分页数据
     private int currentPage = 1;
     private int totalPages = 1;
     private int pageSize = 20;
+    private long totalElements = 0;
+
+    // 构造函数
+    public UserManagementController() {
+        this.userApiService = ApiServiceManager.getInstance().getUserApiService();
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -80,6 +100,9 @@ public class UserManagementController implements Initializable {
         try {
             // 初始化组件
             initializeComponents();
+            
+            // 初始化表格
+            initializeTable();
             
             // 加载数据
             loadUsers();
@@ -100,16 +123,13 @@ public class UserManagementController implements Initializable {
         roleFilterComboBox.getItems().addAll("全部角色", "管理员", "普通用户");
         roleFilterComboBox.setValue("全部角色");
         
-        statusFilterComboBox.getItems().addAll("全部状态", "活跃", "禁用", "锁定");
+        statusFilterComboBox.getItems().addAll("全部状态", "正常", "停用", "封禁");
         statusFilterComboBox.setValue("全部状态");
 
         // 初始化分页大小选择器
         pageSizeComboBox.getItems().addAll("10", "20", "50", "100");
         pageSizeComboBox.setValue("20");
 
-        // 初始化表格
-        initializeTable();
-        
         // 设置默认状态
         updateStatus("就绪");
         updateLastUpdate();
@@ -120,8 +140,100 @@ public class UserManagementController implements Initializable {
      * 初始化表格
      */
     private void initializeTable() {
-        // TODO: 配置表格列和数据绑定
-        userTableView.setPlaceholder(new Label("暂无用户数据"));
+        // 绑定数据到表格
+        userTableView.setItems(userList);
+        
+        // 设置表格列的数据绑定
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        usernameColumn.setCellValueFactory(new PropertyValueFactory<>("username"));
+        realNameColumn.setCellValueFactory(new PropertyValueFactory<>("realName"));
+        emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
+        
+        // 角色列 - 显示中文
+        roleColumn.setCellValueFactory(cellData -> {
+            User.Role role = cellData.getValue().getRole();
+            return new javafx.beans.property.SimpleStringProperty(
+                role != null ? role.getDisplayName() : "未知"
+            );
+        });
+        
+        // 状态列 - 显示中文
+        statusColumn.setCellValueFactory(cellData -> {
+            User.Status status = cellData.getValue().getStatus();
+            return new javafx.beans.property.SimpleStringProperty(
+                status != null ? status.getDisplayName() : "未知"
+            );
+        });
+        
+        // 注册时间列 - 格式化显示
+        registerTimeColumn.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
+        registerTimeColumn.setCellFactory(column -> new TableCell<User, LocalDateTime>() {
+            @Override
+            protected void updateItem(LocalDateTime item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                }
+            }
+        });
+        
+        // 最后登录时间列 - 格式化显示
+        lastLoginColumn.setCellValueFactory(new PropertyValueFactory<>("lastLoginAt"));
+        lastLoginColumn.setCellFactory(column -> new TableCell<User, LocalDateTime>() {
+            @Override
+            protected void updateItem(LocalDateTime item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText("从未登录");
+                } else {
+                    setText(item.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+                }
+            }
+        });
+        
+        // 操作列 - 添加编辑、删除按钮
+        actionColumn.setCellFactory(new Callback<TableColumn<User, Void>, TableCell<User, Void>>() {
+            @Override
+            public TableCell<User, Void> call(TableColumn<User, Void> param) {
+                return new TableCell<User, Void>() {
+                    private final Button editButton = new Button("编辑");
+                    private final Button deleteButton = new Button("删除");
+                    
+                    {
+                        editButton.setOnAction(event -> {
+                            User user = getTableView().getItems().get(getIndex());
+                            handleEditUser(user);
+                        });
+                        
+                        deleteButton.setOnAction(event -> {
+                            User user = getTableView().getItems().get(getIndex());
+                            handleDeleteUser(user);
+                        });
+                        
+                        editButton.getStyleClass().add("button-primary");
+                        deleteButton.getStyleClass().add("button-danger");
+                    }
+                    
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            javafx.scene.layout.HBox buttons = new javafx.scene.layout.HBox(5);
+                            buttons.getChildren().addAll(editButton, deleteButton);
+                            setGraphic(buttons);
+                        }
+                    }
+                };
+            }
+        });
+        
+        // 设置表格为空时的提示
+        userTableView.setPlaceholder(new Label("正在加载用户数据..."));
     }
 
     /**
@@ -130,21 +242,130 @@ public class UserManagementController implements Initializable {
     private void loadUsers() {
         updateStatus("正在加载用户数据...");
         
-        // TODO: 从服务器加载用户数据
-        Platform.runLater(() -> {
-            try {
-                // 暂时显示模拟统计数据
-                updateStatistics(1250, 980, 25, 68);
-                totalRecordsLabel.setText("共 0 条记录");
-                updatePageInfo();
-                updateStatus("数据加载完成");
-                updateLastUpdate();
+        // 获取过滤条件
+        String searchKeyword = searchField.getText();
+        String roleFilter = roleFilterComboBox.getValue();
+        String statusFilter = statusFilterComboBox.getValue();
+        
+        // 转换过滤条件
+        User.Role role = convertRoleFilter(roleFilter);
+        User.Status status = convertStatusFilter(statusFilter);
+        
+        // 调用API获取分页数据
+        CompletableFuture<PageData<User>> future = userApiService.getUsers(
+            currentPage - 1, // API从0开始计数
+            pageSize,
+            searchKeyword,
+            role,
+            status
+        );
+        
+        future.thenAccept(pageData -> {
+            Platform.runLater(() -> {
+                try {
+                    if (pageData != null) {
+                        // 更新表格数据
+                        userList.clear();
+                        userList.addAll(pageData.getContent());
+                        
+                        // 更新分页信息
+                        totalElements = pageData.getTotalElements();
+                        totalPages = pageData.getTotalPages();
+                        
+                        // 更新UI显示
+                        updatePageInfo();
+                        updateStatistics(pageData);
+                        totalRecordsLabel.setText("共 " + totalElements + " 条记录");
+                        
+                        // 更新状态
+                        updateStatus("数据加载完成，共 " + pageData.getContent().size() + " 条记录");
+                        updateLastUpdate();
+                        
+                        logger.info("✅ 用户数据加载成功，当前页: {}/{}, 记录数: {}", 
+                            currentPage, totalPages, pageData.getContent().size());
+                    } else {
+                        updateStatus("未获取到数据");
+                        logger.warn("⚠️ 获取用户数据为空");
+                    }
+                    
+                } catch (Exception e) {
+                    logger.error("❌ 处理用户数据失败", e);
+                    updateStatus("数据处理失败: " + e.getMessage());
+                }
+            });
+        }).exceptionally(throwable -> {
+            Platform.runLater(() -> {
+                logger.error("❌ 加载用户数据失败", throwable);
+                updateStatus("数据加载失败: " + throwable.getMessage());
                 
-            } catch (Exception e) {
-                logger.error("❌ 加载用户数据失败", e);
-                updateStatus("数据加载失败: " + e.getMessage());
-            }
+                // 显示错误提示
+                AlertUtils.showError("数据加载失败", 
+                    "无法连接到服务器或数据加载出错：\n" + throwable.getMessage());
+            });
+            return null;
         });
+    }
+
+    /**
+     * 转换角色过滤条件
+     */
+    private User.Role convertRoleFilter(String roleFilter) {
+        if (roleFilter == null || "全部角色".equals(roleFilter)) {
+            return null;
+        }
+        switch (roleFilter) {
+            case "管理员":
+                return User.Role.ADMIN;
+            case "普通用户":
+                return User.Role.USER;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 转换状态过滤条件
+     */
+    private User.Status convertStatusFilter(String statusFilter) {
+        if (statusFilter == null || "全部状态".equals(statusFilter)) {
+            return null;
+        }
+        switch (statusFilter) {
+            case "正常":
+                return User.Status.ACTIVE;
+            case "停用":
+                return User.Status.INACTIVE;
+            case "封禁":
+                return User.Status.BANNED;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * 更新统计信息
+     */
+    private void updateStatistics(PageData<User> pageData) {
+        if (pageData != null) {
+            // 计算统计数据
+            long totalUsers = pageData.getTotalElements();
+            long activeUsers = pageData.getContent().stream()
+                .mapToLong(user -> user.getStatus() == User.Status.ACTIVE ? 1 : 0)
+                .sum();
+            long adminUsers = pageData.getContent().stream()
+                .mapToLong(user -> user.getRole() == User.Role.ADMIN ? 1 : 0)
+                .sum();
+            long newUsers = pageData.getContent().stream()
+                .mapToLong(user -> {
+                    if (user.getCreatedAt() != null) {
+                        return user.getCreatedAt().isAfter(LocalDateTime.now().minusDays(7)) ? 1 : 0;
+                    }
+                    return 0;
+                })
+                .sum();
+            
+            updateStatistics((int)totalUsers, (int)activeUsers, (int)adminUsers, (int)newUsers);
+        }
     }
 
     /**
@@ -170,6 +391,53 @@ public class UserManagementController implements Initializable {
         lastPageButton.setDisable(currentPage >= totalPages);
     }
 
+    /**
+     * 处理编辑用户
+     */
+    private void handleEditUser(User user) {
+        logger.info("✏️ 编辑用户: {}", user.getUsername());
+        AlertUtils.showInfo("编辑用户", "编辑用户功能正在开发中\n用户: " + user.getUsername());
+    }
+
+    /**
+     * 处理删除用户
+     */
+    private void handleDeleteUser(User user) {
+        logger.info("🗑️ 删除用户: {}", user.getUsername());
+        
+        // 确认对话框
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("确认删除");
+        confirmDialog.setHeaderText("删除用户");
+        confirmDialog.setContentText("确定要删除用户 " + user.getUsername() + " 吗？");
+        
+        confirmDialog.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                // 调用删除API
+                userApiService.deleteUser(user.getId())
+                    .thenAccept(success -> {
+                        Platform.runLater(() -> {
+                            if (success) {
+                                logger.info("✅ 用户删除成功: {}", user.getUsername());
+                                AlertUtils.showInfo("删除成功", "用户已成功删除");
+                                loadUsers(); // 重新加载数据
+                            } else {
+                                logger.error("❌ 用户删除失败: {}", user.getUsername());
+                                AlertUtils.showError("删除失败", "删除用户失败，请稍后重试");
+                            }
+                        });
+                    })
+                    .exceptionally(throwable -> {
+                        Platform.runLater(() -> {
+                            logger.error("❌ 删除用户API调用失败", throwable);
+                            AlertUtils.showError("删除失败", "删除用户时发生错误：\n" + throwable.getMessage());
+                        });
+                        return null;
+                    });
+            }
+        });
+    }
+
     // 事件处理方法
     @FXML
     private void handleAddUser() {
@@ -192,18 +460,16 @@ public class UserManagementController implements Initializable {
     @FXML
     private void handleFilter() {
         logger.info("🔍 应用过滤条件");
-        // TODO: 实现过滤逻辑
-        updateStatus("过滤条件已应用");
+        currentPage = 1; // 重置到第一页
+        loadUsers();
     }
 
     @FXML
     private void handleSearch() {
         String keyword = searchField.getText();
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            logger.info("🔍 搜索用户: {}", keyword);
-            // TODO: 实现搜索逻辑
-            updateStatus("搜索: " + keyword);
-        }
+        logger.info("🔍 搜索用户: {}", keyword);
+        currentPage = 1; // 重置到第一页
+        loadUsers();
     }
 
     @FXML
@@ -214,6 +480,7 @@ public class UserManagementController implements Initializable {
         dateFilterPicker.setValue(null);
         
         logger.info("🧹 清除过滤条件");
+        currentPage = 1; // 重置到第一页
         loadUsers();
     }
 

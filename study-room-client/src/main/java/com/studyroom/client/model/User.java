@@ -1,5 +1,7 @@
 package com.studyroom.client.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import java.time.LocalDateTime;
 
 /**
@@ -27,6 +29,23 @@ public class User {
         public String getDisplayName() {
             return displayName;
         }
+
+        @JsonValue
+        public String toValue() {
+            return this.name();
+        }
+
+        @JsonCreator
+        public static Role fromValue(String value) {
+            if (value == null) {
+                return USER; // 默认值
+            }
+            try {
+                return Role.valueOf(value.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return USER; // 如果转换失败，返回默认值
+            }
+        }
     }
 
     /**
@@ -45,6 +64,23 @@ public class User {
 
         public String getDisplayName() {
             return displayName;
+        }
+
+        @JsonValue
+        public String toValue() {
+            return this.name();
+        }
+
+        @JsonCreator
+        public static Status fromValue(String value) {
+            if (value == null) {
+                return ACTIVE; // 默认值
+            }
+            try {
+                return Status.valueOf(value.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ACTIVE; // 如果转换失败，返回默认值
+            }
         }
     }
 
