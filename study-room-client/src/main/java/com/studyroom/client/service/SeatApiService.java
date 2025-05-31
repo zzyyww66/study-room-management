@@ -144,7 +144,10 @@ public class SeatApiService {
      */
     public CompletableFuture<List<Seat>> searchSeats(Long studyRoomId, Seat.Type type, 
                                                      Boolean hasWindow, Boolean hasPowerOutlet, Boolean hasLamp) {
-        logger.debug("🔍 搜索座位: studyRoomId={}, type={}, hasWindow={}, hasPowerOutlet={}, hasLamp={}", 
+        logger.warn("⚠️ 调用了 searchSeats() 方法. This method uses a generic /seats/search endpoint " +
+                    "which is not standard on the server. Server has specific search paths like /available/features, /type/{type}. " +
+                    "This method needs a more detailed refactoring to align with server capabilities.");
+        logger.debug("🔍 搜索座位 (legacy): studyRoomId={}, type={}, hasWindow={}, hasPowerOutlet={}, hasLamp={}",
             studyRoomId, type, hasWindow, hasPowerOutlet, hasLamp);
         
         StringBuilder url = new StringBuilder("/seats/search?");
@@ -193,12 +196,18 @@ public class SeatApiService {
         
         Map<String, Object> seatData = new HashMap<>();
         seatData.put("seatNumber", seat.getSeatNumber());
-        seatData.put("type", seat.getType());
-        seatData.put("hourlyRate", seat.getHourlyRate());
+        seatData.put("type", seat.getType() != null ? seat.getType().name() : null); // Send enum name
+        // hourlyRate is not a seat property on the server for creation
         seatData.put("hasWindow", seat.getHasWindow());
         seatData.put("hasPowerOutlet", seat.getHasPowerOutlet());
         seatData.put("hasLamp", seat.getHasLamp());
         seatData.put("studyRoomId", seat.getStudyRoomId());
+        seatData.put("rowNum", seat.getRowNum());
+        seatData.put("colNum", seat.getColNum());
+        // Description and equipment are not part of the client Seat model directly,
+        // but server createSeat accepts them. If they were on client model, they'd be added here.
+        // seatData.put("description", seat.getDescription());
+        // seatData.put("equipment", seat.getEquipment());
         
         return httpClient.post("/seats", seatData)
             .thenApply(this::parseSeatResponse)
@@ -219,12 +228,21 @@ public class SeatApiService {
         
         Map<String, Object> seatData = new HashMap<>();
         seatData.put("seatNumber", seat.getSeatNumber());
-        seatData.put("type", seat.getType());
-        seatData.put("hourlyRate", seat.getHourlyRate());
+        seatData.put("type", seat.getType() != null ? seat.getType().name() : null); // Send enum name
+        // hourlyRate is not a seat property
         seatData.put("hasWindow", seat.getHasWindow());
         seatData.put("hasPowerOutlet", seat.getHasPowerOutlet());
         seatData.put("hasLamp", seat.getHasLamp());
-        seatData.put("status", seat.getStatus());
+        // Status is updated via a separate endpoint PUT /seats/{seatId}/status
+        // Description and equipment are not part of the client Seat model directly for update here.
+        // if (seat.getDescription() != null) seatData.put("description", seat.getDescription());
+        // if (seat.getEquipment() != null) seatData.put("equipment", seat.getEquipment());
+        if (seat.getRowNum() != null) { // Only include if set, server might not allow unsetting via null
+            seatData.put("rowNum", seat.getRowNum());
+        }
+        if (seat.getColNum() != null) {
+            seatData.put("colNum", seat.getColNum());
+        }
         
         return httpClient.put("/seats/" + seat.getId(), seatData)
             .thenApply(this::parseSeatResponse)
@@ -319,16 +337,17 @@ public class SeatApiService {
      */
     private Seat parseSeatResponse(String jsonResponse) {
         try {
-            ApiResponse<Seat> response = objectMapper.readValue(jsonResponse, 
+            ApiResponse<Seat> apiResponse = objectMapper.readValue(jsonResponse,
                 new TypeReference<ApiResponse<Seat>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
+
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                return apiResponse.getData();
             } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
         } catch (Exception e) {
-            logger.error("❌ 解析座位响应失败", e);
+            logger.error("❌ 解析座位响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -338,16 +357,17 @@ public class SeatApiService {
      */
     private List<Seat> parseSeatListResponse(String jsonResponse) {
         try {
-            ApiResponse<List<Seat>> response = objectMapper.readValue(jsonResponse, 
+            ApiResponse<List<Seat>> apiResponse = objectMapper.readValue(jsonResponse,
                 new TypeReference<ApiResponse<List<Seat>>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
+
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                return apiResponse.getData();
             } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
         } catch (Exception e) {
-            logger.error("❌ 解析座位列表响应失败", e);
+            logger.error("❌ 解析座位列表响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -357,16 +377,32 @@ public class SeatApiService {
      */
     private PageData<Seat> parseSeatPageResponse(String jsonResponse) {
         try {
-            ApiResponse<PageData<Seat>> response = objectMapper.readValue(jsonResponse, 
+            ApiResponse<PageData<Seat>> apiResponse = objectMapper.readValue(jsonResponse,
                 new TypeReference<ApiResponse<PageData<Seat>>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
+
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                PageData<Seat> pageData = apiResponse.getData();
+                if (pageData != null) {
+                    // Ensure content is correctly deserialized if it's a list of maps initially
+                    if (pageData.getContent() != null && !pageData.getContent().isEmpty() && !(pageData.getContent().get(0) instanceof Seat)) {
+                        List<Seat> seats = pageData.getContent().stream()
+                            .map(item -> objectMapper.convertValue(item, Seat.class))
+                            .collect(java.util.stream.Collectors.toList());
+                        pageData.setContent(seats);
+                    }
+                     logger.debug("✅ 座位分页数据解析成功: 当前页={}, 总页数={}, 总记录数={}, 当前页记录数={}",
+                        pageData.getPageNumber(), pageData.getTotalPages(), pageData.getTotalElements(), pageData.getContent() != null ? pageData.getContent().size() : 0);
+                    return pageData;
+                } else {
+                    logger.error("❌ 座位分页响应数据为空");
+                    throw new RuntimeException("API错误: 响应数据为空");
+                }
             } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
         } catch (Exception e) {
-            logger.error("❌ 解析座位分页响应失败", e);
+            logger.error("❌ 解析座位分页响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -377,16 +413,17 @@ public class SeatApiService {
     @SuppressWarnings("unchecked")
     private Map<String, Object> parseStatisticsResponse(String jsonResponse) {
         try {
-            ApiResponse<Map<String, Object>> response = objectMapper.readValue(jsonResponse, 
+            ApiResponse<Map<String, Object>> apiResponse = objectMapper.readValue(jsonResponse,
                 new TypeReference<ApiResponse<Map<String, Object>>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
+
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                return apiResponse.getData();
             } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
         } catch (Exception e) {
-            logger.error("❌ 解析统计信息响应失败", e);
+            logger.error("❌ 解析统计信息响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -396,17 +433,51 @@ public class SeatApiService {
      */
     private Boolean parseBooleanResponse(String jsonResponse) {
         try {
-            ApiResponse<Boolean> response = objectMapper.readValue(jsonResponse, 
-                new TypeReference<ApiResponse<Boolean>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData() != null ? response.getData() : false;
-            } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+            // Attempt to parse as ApiResponse<Boolean> first
+             try {
+                ApiResponse<Boolean> apiResponse = objectMapper.readValue(jsonResponse,
+                        new TypeReference<ApiResponse<Boolean>>() {});
+                if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                    return apiResponse.getData() != null ? apiResponse.getData() : false;
+                } else {
+                     // Check if data is a map containing a boolean
+                    if (apiResponse.getData() instanceof Map) {
+                         Map<?, ?> dataMap = (Map<?, ?>) apiResponse.getData();
+                        if (dataMap.containsKey("success") && dataMap.get("success") instanceof Boolean) {
+                            logger.warn("⚠️ API returned success code but boolean data was in a map for: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)));
+                            return (Boolean) dataMap.get("success");
+                        }
+                         if (dataMap.containsKey("available") && dataMap.get("available") instanceof Boolean) {
+                            logger.warn("⚠️ API returned success code but boolean data was in a map for: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)));
+                            return (Boolean) dataMap.get("available");
+                        }
+                    }
+                    logger.error("❌ API请求失败 (Boolean direct): Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                    throw new RuntimeException("API错误: " + apiResponse.getMessage());
+                }
+            } catch (com.fasterxml.jackson.databind.JsonMappingException e) {
+                // If direct Boolean parsing fails, try parsing as ApiResponse<Map<String, Boolean>>
+                logger.warn("⚠️ Direct boolean parsing failed for SeatApi, attempting to parse as Map<String, Boolean>: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)));
+                ApiResponse<Map<String, Boolean>> apiResponseMap = objectMapper.readValue(jsonResponse,
+                        new TypeReference<ApiResponse<Map<String, Boolean>>>() {});
+
+                if (apiResponseMap.getCode() == 200) { // Assuming 200 is success
+                    Map<String, Boolean> dataMap = apiResponseMap.getData();
+                     if (dataMap != null) {
+                        if (dataMap.containsKey("success")) return dataMap.get("success");
+                        if (dataMap.containsKey("available")) return dataMap.get("available");
+                        logger.warn("⚠️ Boolean response map did not contain 'success' or 'available' key: {}", dataMap);
+                        return !dataMap.isEmpty();
+                    }
+                    return false;
+                } else {
+                    logger.error("❌ API请求失败 (Boolean as Map): Code={}, Message={}", apiResponseMap.getCode(), apiResponseMap.getMessage());
+                    throw new RuntimeException("API错误: " + apiResponseMap.getMessage());
+                }
             }
         } catch (Exception e) {
-            logger.error("❌ 解析布尔响应失败", e);
+            logger.error("❌ 解析布尔响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
-} 
+}

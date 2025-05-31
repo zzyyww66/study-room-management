@@ -29,7 +29,7 @@ public interface SeatService {
      */
     Seat createSeat(String seatNumber, Long studyRoomId, Seat.SeatType type,
                     Boolean hasWindow, Boolean hasPowerOutlet, Boolean hasLamp,
-                    String description, String equipment);
+                    String description, String equipment, Integer rowNum, Integer colNum);
     
     /**
      * 根据ID查找座位

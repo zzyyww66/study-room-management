@@ -203,6 +203,7 @@ public interface ReservationService {
      * @return 预订分页结果
      */
     org.springframework.data.domain.Page<Reservation> findReservationsWithPagination(
-        int page, int size, Long userId, Reservation.ReservationStatus status, 
-        Reservation.PaymentStatus paymentStatus);
+        int page, int size, Long userId, Long seatId,
+        Reservation.ReservationStatus status, Reservation.PaymentStatus paymentStatus,
+        LocalDateTime startDate, LocalDateTime endDate);
 } 

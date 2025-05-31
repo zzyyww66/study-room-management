@@ -40,6 +40,9 @@ public class StudyRoom {
     private LocalDateTime createTime; // 保留兼容性
     private LocalDateTime updateTime; // 保留兼容性
 
+    // Associated seats
+    private java.util.List<Seat> seats;
+
     /**
      * 自习室状态枚举
      */
@@ -200,6 +203,14 @@ public class StudyRoom {
     public void setUpdateTime(LocalDateTime updateTime) {
         this.updateTime = updateTime;
         this.updatedAt = updateTime; // 保持同步
+    }
+
+    public java.util.List<Seat> getSeats() {
+        return seats;
+    }
+
+    public void setSeats(java.util.List<Seat> seats) {
+        this.seats = seats;
     }
 
     // 业务方法
