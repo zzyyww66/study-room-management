@@ -5,8 +5,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
@@ -16,14 +18,18 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    // WARNING: Hardcoded secret key for demonstration purposes only.
-    // In a production environment, this key should be externalized and kept secure.
-    private static final String SECRET_KEY = "YourSuperSecretKeyForStudyRoomApplicationWhichIsVeryLongAndSecure";
+    @Value("${jwt.secret.key}")
+    private String secretKey;
 
-    private static final Key SIGNING_KEY = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    private Key signingKey;
 
     // Token validity (e.g., 10 hours)
     private static final long TOKEN_VALIDITY = 10 * 60 * 60 * 1000; // 10 hours in milliseconds
+
+    @PostConstruct
+    public void init() {
+        this.signingKey = Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
 
     /**
      * Generates a JWT token for a given user.
@@ -35,15 +41,18 @@ public class JwtUtil {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
         claims.put("username", user.getUsername());
-        // Add any other claims like roles if necessary
-        // claims.put("role", user.getRole().name());
+        if (user.getRole() != null) {
+            claims.put("role", user.getRole().name()); // Add role to claims
+        } else {
+            claims.put("role", User.UserRole.USER.name()); // Default to USER if role is somehow null
+        }
 
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(user.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY))
-                .signWith(SIGNING_KEY, SignatureAlgorithm.HS256)
+                .signWith(this.signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -65,6 +74,16 @@ public class JwtUtil {
      */
     public Long extractUserId(String token) {
         return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
+    /**
+     * Extracts the role from a JWT token.
+     *
+     * @param token The JWT token.
+     * @return The role extracted from the token.
+     */
+    public String extractRole(String token) {
+        return extractClaim(token, claims -> claims.get("role", String.class));
     }
 
     /**
@@ -98,7 +117,7 @@ public class JwtUtil {
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SIGNING_KEY)
+                .setSigningKey(this.signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
