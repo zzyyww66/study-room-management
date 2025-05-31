@@ -40,23 +40,25 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<Map<String, Object>>> getCurrentUserProfile(HttpServletRequest request) {
         try {
-            String authorizationHeader = request.getHeader("Authorization");
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            // JwtRequestFilter is expected to have validated the token and set 'x-user-id' attribute.
+            Object userIdAttribute = request.getAttribute("x-user-id");
+
+            if (userIdAttribute == null) {
+                // This should not happen if JwtRequestFilter is correctly configured and working.
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(createErrorResponse("缺少或无效的Authorization Header", HttpStatus.UNAUTHORIZED.value()));
+                    .body(createErrorResponse("用户未认证或用户ID未在请求中设置", HttpStatus.UNAUTHORIZED.value()));
             }
 
-            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             Long currentUserId;
-            try {
-                currentUserId = jwtUtil.extractUserId(token);
-                 if (!jwtUtil.validateToken(token)) { // Also validate expiration/signature
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(createErrorResponse("无效或过期的Token", HttpStatus.UNAUTHORIZED.value()));
-                }
-            } catch (Exception e) { // Catch specific JWT exceptions if preferred
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(createErrorResponse("无效或过期的Token: " + e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+            if (userIdAttribute instanceof Long) {
+                currentUserId = (Long) userIdAttribute;
+            } else if (userIdAttribute instanceof Integer) { // GSON might parse number as Integer
+                currentUserId = ((Integer) userIdAttribute).longValue();
+            }
+            else {
+                 // Fallback or error if attribute is not of expected type, though Long is expected from JwtUtil
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("无法解析用户ID从请求属性", HttpStatus.INTERNAL_SERVER_ERROR.value()));
             }
 
             var userOpt = userService.findById(currentUserId);
@@ -65,11 +67,16 @@ public class UserController {
                 responseData.put("user", createUserResponse(userOpt.get()));
                 return ResponseEntity.ok(ApiResponse.success(responseData, "获取当前用户信息成功"));
             } else {
-                // This case should ideally not happen if token is valid and user ID in token exists
+                // This case should ideally not happen if token is valid, user ID in token exists,
+                // and x-user-id attribute was correctly set by the filter.
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("用户不存在 (ID: " + currentUserId + ")", HttpStatus.NOT_FOUND.value()));
             }
-        } catch (Exception e) {
+        } catch (ClassCastException e) {
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createErrorResponse("服务器内部错误: 无法转换用户ID类型.", HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(createErrorResponse("获取当前用户信息失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }
@@ -103,9 +110,34 @@ public class UserController {
      */
     @PutMapping("/{userId}/profile")
     public ResponseEntity<ApiResponse<Map<String, Object>>> updateProfile(
-            @PathVariable Long userId,
-            @RequestBody Map<String, String> profileRequest) {
+            @PathVariable Long userId, // This is the targetUserId
+            @RequestBody Map<String, String> profileRequest,
+            HttpServletRequest request) {
         try {
+            Object authUserIdAttr = request.getAttribute("x-user-id");
+            Object authUserRoleAttr = request.getAttribute("x-user-role");
+
+            if (authUserIdAttr == null || authUserRoleAttr == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(createErrorResponse("用户认证信息缺失", HttpStatus.UNAUTHORIZED.value()));
+            }
+
+            Long authenticatedUserId = -1L; // Default to an invalid ID
+            if (authUserIdAttr instanceof Long) {
+                authenticatedUserId = (Long) authUserIdAttr;
+            } else if (authUserIdAttr instanceof Integer) {
+                authenticatedUserId = ((Integer) authUserIdAttr).longValue();
+            }
+
+            String authenticatedUserRole = (String) authUserRoleAttr;
+
+            // Authorization check: Admin can update any profile, User can only update their own.
+            if (!"ADMIN".equals(authenticatedUserRole) && !authenticatedUserId.equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(createErrorResponse("无权修改此用户资料", HttpStatus.FORBIDDEN.value()));
+            }
+
+            // Proceed with update if authorized
             String email = profileRequest.get("email");
             String phone = profileRequest.get("phone");
             String realName = profileRequest.get("realName");
@@ -117,7 +149,11 @@ public class UserController {
 
             return ResponseEntity.ok(ApiResponse.success(responseData, "用户资料更新成功"));
 
-        } catch (Exception e) {
+        } catch (ClassCastException e) {
+             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createErrorResponse("服务器内部错误: 无法转换用户认证信息类型.", HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(createErrorResponse("更新用户资料失败: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value()));
         }

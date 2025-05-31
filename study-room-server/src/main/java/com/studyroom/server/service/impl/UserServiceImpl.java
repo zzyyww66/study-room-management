@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +38,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public User registerUser(String username, String password, String email, String phone, String realName) {
         // 检查用户名和邮箱是否已存在
@@ -50,7 +54,7 @@ public class UserServiceImpl implements UserService {
         // 创建新用户
         User user = new User();
         user.setUsername(username);
-        user.setPassword(password); // 实际项目中应该加密密码
+        user.setPassword(passwordEncoder.encode(password)); // 加密密码
         user.setEmail(email);
         user.setPhone(phone);
         user.setRealName(realName);
@@ -66,8 +70,8 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            // 实际项目中应该验证加密后的密码
-            if (password.equals(user.getPassword()) && user.getStatus() == User.UserStatus.ACTIVE) {
+            // 验证加密后的密码
+            if (passwordEncoder.matches(password, user.getPassword()) && user.getStatus() == User.UserStatus.ACTIVE) {
                 return user;
             }
         }
@@ -137,13 +141,13 @@ public class UserServiceImpl implements UserService {
         }
         
         User user = userOpt.get();
-        // 验证旧密码（实际项目中应该验证加密后的密码）
-        if (!oldPassword.equals(user.getPassword())) {
+        // 验证旧密码
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             return false;
         }
         
-        // 设置新密码（实际项目中应该加密）
-        user.setPassword(newPassword);
+        // 设置新密码（加密）
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         return true;
     }

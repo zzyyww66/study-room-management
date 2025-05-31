@@ -119,22 +119,30 @@ public class AuthController {
     @PutMapping("/change-password")
     public ResponseEntity<ApiResponse<Object>> changePassword(HttpServletRequest request, @RequestBody Map<String, String> passwordRequest) {
         try {
+            // JwtRequestFilter is expected to have validated the token already.
+            // We still need to extract userId from the token.
             String authorizationHeader = request.getHeader("Authorization");
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(createErrorResponse("缺少或无效的Authorization Header", HttpStatus.UNAUTHORIZED.value()));
+            String token = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);
             }
-            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+
+            if (token == null) {
+                // This case should ideally be caught by the filter, but as a fallback:
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(createErrorResponse("缺少Authorization Header", HttpStatus.UNAUTHORIZED.value()));
+            }
+
             Long userId;
             try {
+                // Extract userId. If token is malformed or unparseable here, it's an issue.
+                // The filter should have already validated its signature and expiry.
                 userId = jwtUtil.extractUserId(token);
-                if (!jwtUtil.validateToken(token)) { // Also validate expiration/signature
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(createErrorResponse("无效或过期的Token", HttpStatus.UNAUTHORIZED.value()));
-                }
-            } catch (Exception e) { // Catch specific JWT exceptions if preferred
+            } catch (Exception e) {
+                // This might happen if the token is grossly malformed,
+                // though signature/expiry should be caught by filter.
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(createErrorResponse("无效或过期的Token: " + e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+                    .body(createErrorResponse("无效Token格式: " + e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
             }
 
             String oldPassword = passwordRequest.get("oldPassword");
