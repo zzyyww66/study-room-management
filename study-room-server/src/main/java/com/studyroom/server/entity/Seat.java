@@ -57,6 +57,12 @@ public class Seat {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column
+    private Integer rowNum;
+
+    @Column
+    private Integer colNum;
+
     // 多个座位属于一个自习室
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_room_id", nullable = false)
@@ -223,6 +229,22 @@ public class Seat {
         this.reservations = reservations;
     }
 
+    public Integer getRowNum() {
+        return rowNum;
+    }
+
+    public void setRowNum(Integer rowNum) {
+        this.rowNum = rowNum;
+    }
+
+    public Integer getColNum() {
+        return colNum;
+    }
+
+    public void setColNum(Integer colNum) {
+        this.colNum = colNum;
+    }
+
     @Override
     public String toString() {
         return "Seat{" +
@@ -230,10 +252,12 @@ public class Seat {
                 ", seatNumber='" + seatNumber + '\'' +
                 ", type=" + type +
                 ", status=" + status +
+                ", rowNum=" + rowNum +
+                ", colNum=" + colNum +
                 ", hasWindow=" + hasWindow +
                 ", hasPowerOutlet=" + hasPowerOutlet +
                 ", hasLamp=" + hasLamp +
                 ", createdAt=" + createdAt +
                 '}';
     }
-} 
+}

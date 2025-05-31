@@ -44,7 +44,7 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public Seat createSeat(String seatNumber, Long studyRoomId, Seat.SeatType type,
                           Boolean hasWindow, Boolean hasPowerOutlet, Boolean hasLamp,
-                          String description, String equipment) {
+                          String description, String equipment, Integer rowNum, Integer colNum) {
         // 验证自习室是否存在
         Optional<StudyRoom> studyRoomOpt = studyRoomRepository.findById(studyRoomId);
         if (!studyRoomOpt.isPresent()) {
@@ -68,6 +68,8 @@ public class SeatServiceImpl implements SeatService {
         seat.setHasLamp(hasLamp != null ? hasLamp : false);
         seat.setDescription(description);
         seat.setEquipment(equipment);
+        seat.setRowNum(rowNum);
+        seat.setColNum(colNum);
         
         return seatRepository.save(seat);
     }

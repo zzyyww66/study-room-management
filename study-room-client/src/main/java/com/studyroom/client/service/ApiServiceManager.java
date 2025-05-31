@@ -212,10 +212,25 @@ public class ApiServiceManager {
 
     /**
      * 执行用户登出
+     * 调用服务器登出接口，并清除本地认证信息
      */
-    public void logout() {
-        clearAuthToken();
-        logger.info("👋 用户已登出");
+    public CompletableFuture<Void> logout() {
+        logger.info("👋 尝试用户登出");
+        // Call the server's logout endpoint.
+        // The server's /auth/logout is simple and might not do much with the token itself,
+        // but calling it is good practice for session invalidation if implemented later on server.
+        return httpClientService.post("/auth/logout", null) // Assuming null body is fine
+            .thenRun(() -> {
+                clearAuthToken(); // Clears token from HttpClientService and DataBindingService
+                logger.info("✅ 用户已成功登出并清除本地认证信息");
+            })
+            .exceptionally(throwable -> {
+                logger.error("❌ 登出API调用失败: {}, 仍将清除本地认证信息", throwable.getMessage());
+                // Even if API call fails, clear local token to ensure user is logged out കാഴ്ചപ്പാടിൽ
+                clearAuthToken();
+                // Optionally, rethrow or handle more gracefully depending on desired UX
+                return null; // CompletableFuture<Void> expects null here for exceptionally
+            });
     }
 
     /**

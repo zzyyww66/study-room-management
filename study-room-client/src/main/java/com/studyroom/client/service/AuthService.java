@@ -22,53 +22,8 @@ public class AuthService {
     private String serverUrl = "http://localhost:8080";
     private User currentUser;
 
-    /**
-     * 用户登录验证
-     */
-    public User login(String username, String password) throws Exception {
-        logger.info("🔄 正在验证用户登录: {}", username);
-        
-        // 模拟登录延迟
-        Thread.sleep(1000);
-        
-        // TODO: 实现真实的服务器登录验证
-        // 这里暂时使用模拟验证
-        if (validateCredentials(username, password)) {
-            // 创建用户对象
-            User user = createUserFromCredentials(username, password);
-            
-            // 记录当前用户
-            this.currentUser = user;
-            
-            logger.info("✅ 用户登录成功: {}", username);
-            return user;
-        } else {
-            logger.warn("⚠️ 用户登录失败: 用户名或密码错误");
-            throw new Exception("用户名或密码错误");
-        }
-    }
-
-    /**
-     * 模拟凭据验证
-     */
-    private boolean validateCredentials(String username, String password) {
-        // 模拟管理员账号
-        if ("admin".equals(username) && "admin123".equals(password)) {
-            return true;
-        }
-        
-        // 模拟普通用户账号
-        if ("user".equals(username) && "user123".equals(password)) {
-            return true;
-        }
-        
-        // 模拟测试账号
-        if ("test".equals(username) && "test123".equals(password)) {
-            return true;
-        }
-        
-        return false;
-    }
+    // Mock login and validation methods are now removed.
+    // Actual login is handled by UserApiService and managed by ApiServiceManager.
 
     /**
      * 根据凭据创建用户对象

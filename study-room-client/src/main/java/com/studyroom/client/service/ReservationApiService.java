@@ -36,7 +36,7 @@ public class ReservationApiService {
     private final ObjectMapper objectMapper;
     
     // 日期时间格式器
-    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     /**
      * 私有构造函数 - 单例模式
@@ -391,16 +391,17 @@ public class ReservationApiService {
      */
     private Reservation parseReservationResponse(String jsonResponse) {
         try {
-            ApiResponse<Reservation> response = objectMapper.readValue(jsonResponse, 
+            ApiResponse<Reservation> apiResponse = objectMapper.readValue(jsonResponse,
                 new TypeReference<ApiResponse<Reservation>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
+
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                return apiResponse.getData();
             } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
         } catch (Exception e) {
-            logger.error("❌ 解析预订响应失败", e);
+            logger.error("❌ 解析预订响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -410,16 +411,17 @@ public class ReservationApiService {
      */
     private List<Reservation> parseReservationListResponse(String jsonResponse) {
         try {
-            ApiResponse<List<Reservation>> response = objectMapper.readValue(jsonResponse, 
+            ApiResponse<List<Reservation>> apiResponse = objectMapper.readValue(jsonResponse,
                 new TypeReference<ApiResponse<List<Reservation>>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
+
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                return apiResponse.getData();
             } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
         } catch (Exception e) {
-            logger.error("❌ 解析预订列表响应失败", e);
+            logger.error("❌ 解析预订列表响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -429,59 +431,32 @@ public class ReservationApiService {
      */
     private PageData<Reservation> parseReservationPageResponse(String jsonResponse) {
         try {
-            logger.debug("🔄 解析预订分页响应: {}", jsonResponse.substring(0, Math.min(200, jsonResponse.length())));
+            ApiResponse<PageData<Reservation>> apiResponse = objectMapper.readValue(jsonResponse,
+                new TypeReference<ApiResponse<PageData<Reservation>>>() {});
 
-            // 直接解析后端返回的实际格式 (类似StudyRoomApiService的修复)
-            Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, Map.class);
-
-            Boolean success = (Boolean) responseMap.get("success");
-            // 后端直接返回分页对象，不一定有success字段，但我们需要content列表
-            // if (success == null || !success) {
-            //     String message = (String) responseMap.getOrDefault("message", "未知API错误");
-            //     logger.error("API响应错误: {}", message);
-            //     throw new RuntimeException("API错误: " + message);
-            // }
-
-            List<Map<String, Object>> reservationsData = (List<Map<String, Object>>) responseMap.get("content"); // 后端Page对象通常用content
-            if (reservationsData == null) {
-                // 尝试另一种可能的key，如后端直接返回reservations数组
-                reservationsData = (List<Map<String, Object>>) responseMap.get("reservations");
-                if (reservationsData == null) {
-                     logger.warn("分页响应中未找到 'content' 或 'reservations' 预订列表");
-                     reservationsData = new java.util.ArrayList<>(); // 返回空列表避免NPE
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                PageData<Reservation> pageData = apiResponse.getData();
+                if (pageData != null) {
+                    // Ensure content is correctly deserialized if it's a list of maps initially
+                    if (pageData.getContent() != null && !pageData.getContent().isEmpty() && !(pageData.getContent().get(0) instanceof Reservation)) {
+                        List<Reservation> reservations = pageData.getContent().stream()
+                            .map(item -> objectMapper.convertValue(item, Reservation.class))
+                            .collect(java.util.stream.Collectors.toList());
+                        pageData.setContent(reservations);
+                    }
+                    logger.debug("✅ 预订分页数据解析成功: 当前页={}, 总页数={}, 总记录数={}, 当前页记录数={}",
+                        pageData.getPageNumber(), pageData.getTotalPages(), pageData.getTotalElements(), pageData.getContent() != null ? pageData.getContent().size() : 0);
+                    return pageData;
+                } else {
+                    logger.error("❌ 预订分页响应数据为空");
+                    throw new RuntimeException("API错误: 响应数据为空");
                 }
+            } else {
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
-
-            Integer totalPages = (Integer) responseMap.get("totalPages");
-            Long totalElements = null;
-            Object totalElementsObj = responseMap.get("totalElements");
-            if (totalElementsObj instanceof Integer) {
-                totalElements = ((Integer) totalElementsObj).longValue();
-            } else if (totalElementsObj instanceof Long) {
-                totalElements = (Long) totalElementsObj;
-            }
-            
-            // Integer currentPage = (Integer) responseMap.get("currentPage"); // Spring Page 是0-indexed, FXML通常1-indexed
-            // int number = responseMap.get("number") != null ? (Integer)responseMap.get("number") : 0;
-
-            List<Reservation> reservations = reservationsData.stream()
-                .map(data -> objectMapper.convertValue(data, Reservation.class))
-                .collect(java.util.stream.Collectors.toList());
-
-            PageData<Reservation> pageData = new PageData<>();
-            pageData.setContent(reservations);
-            pageData.setTotalElements(totalElements != null ? totalElements : 0L);
-            pageData.setTotalPages(totalPages != null ? totalPages : 0);
-            // pageData.setCurrentPage(number); // 如果需要当前页码
-
-            logger.debug("✅ 预订分页数据解析成功: 总页数={}, 总记录数={}, 当前页记录数={}",
-                totalPages, totalElements, reservations.size());
-
-            return pageData;
-
         } catch (Exception e) {
-            logger.error("❌ 解析预订分页响应失败: {}", e.getMessage(), e);
-            logger.debug("原始预订分页响应: {}", jsonResponse);
+            logger.error("❌ 解析预订分页响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("预订数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -492,16 +467,17 @@ public class ReservationApiService {
     @SuppressWarnings("unchecked")
     private Map<String, Object> parseStatisticsResponse(String jsonResponse) {
         try {
-            ApiResponse<Map<String, Object>> response = objectMapper.readValue(jsonResponse, 
+            ApiResponse<Map<String, Object>> apiResponse = objectMapper.readValue(jsonResponse,
                 new TypeReference<ApiResponse<Map<String, Object>>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData();
+
+            if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                return apiResponse.getData();
             } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+                logger.error("❌ API请求失败: Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                throw new RuntimeException("API错误: " + apiResponse.getMessage());
             }
         } catch (Exception e) {
-            logger.error("❌ 解析统计信息响应失败", e);
+            logger.error("❌ 解析统计信息响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
@@ -511,17 +487,56 @@ public class ReservationApiService {
      */
     private Boolean parseBooleanResponse(String jsonResponse) {
         try {
-            ApiResponse<Boolean> response = objectMapper.readValue(jsonResponse, 
-                new TypeReference<ApiResponse<Boolean>>() {});
-            
-            if (response.isSuccess()) {
-                return response.getData() != null ? response.getData() : false;
-            } else {
-                throw new RuntimeException("API错误: " + response.getMessage());
+            // Attempt to parse as ApiResponse<Boolean> first
+             try {
+                ApiResponse<Boolean> apiResponse = objectMapper.readValue(jsonResponse,
+                        new TypeReference<ApiResponse<Boolean>>() {});
+                if (apiResponse.getCode() == 200) { // Assuming 200 is success
+                    // Check if data itself is the boolean or if it's a map like {"hasConflict": false}
+                     Object data = apiResponse.getData();
+                    if (data instanceof Boolean) {
+                        return (Boolean) data;
+                    } else if (data instanceof Map) {
+                        Map<?,?> dataMap = (Map<?,?>) data;
+                        if (dataMap.containsKey("hasConflict") && dataMap.get("hasConflict") instanceof Boolean) {
+                             logger.warn("⚠️ Boolean data for 'hasConflict' was in a map for: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)));
+                            return (Boolean) dataMap.get("hasConflict");
+                        }
+                        if (dataMap.containsKey("success") && dataMap.get("success") instanceof Boolean) {
+                             logger.warn("⚠️ Boolean data for 'success' was in a map for: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)));
+                            return (Boolean) dataMap.get("success");
+                        }
+                         logger.warn("⚠️ Boolean response map did not contain expected boolean key: {}", dataMap);
+                         return !dataMap.isEmpty(); // Default if map is not empty
+                    }
+                    return false; // Default if data is null or not a recognized structure
+                } else {
+                    logger.error("❌ API请求失败 (Boolean direct): Code={}, Message={}", apiResponse.getCode(), apiResponse.getMessage());
+                    throw new RuntimeException("API错误: " + apiResponse.getMessage());
+                }
+            } catch (com.fasterxml.jackson.databind.JsonMappingException e) {
+                // If direct Boolean parsing fails, try parsing as ApiResponse<Map<String, Boolean>>
+                logger.warn("⚠️ Direct boolean parsing failed for ReservationApi, attempting to parse as Map<String, Boolean>: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)));
+                ApiResponse<Map<String, Boolean>> apiResponseMap = objectMapper.readValue(jsonResponse,
+                        new TypeReference<ApiResponse<Map<String, Boolean>>>() {});
+
+                if (apiResponseMap.getCode() == 200) { // Assuming 200 is success
+                    Map<String, Boolean> dataMap = apiResponseMap.getData();
+                     if (dataMap != null) {
+                        if (dataMap.containsKey("hasConflict")) return dataMap.get("hasConflict");
+                        if (dataMap.containsKey("success")) return dataMap.get("success");
+                        logger.warn("⚠️ Boolean response map did not contain 'hasConflict' or 'success' key: {}", dataMap);
+                        return !dataMap.isEmpty();
+                    }
+                    return false;
+                } else {
+                    logger.error("❌ API请求失败 (Boolean as Map): Code={}, Message={}", apiResponseMap.getCode(), apiResponseMap.getMessage());
+                    throw new RuntimeException("API错误: " + apiResponseMap.getMessage());
+                }
             }
         } catch (Exception e) {
-            logger.error("❌ 解析布尔响应失败", e);
+            logger.error("❌ 解析布尔响应失败: {}", jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)), e);
             throw new RuntimeException("数据解析失败: " + e.getMessage(), e);
         }
     }
-} 
+}

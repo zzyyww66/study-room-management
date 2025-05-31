@@ -92,6 +92,12 @@ public class Seat {
     @JsonProperty("updatedAt")
     private LocalDateTime updatedAt;
 
+    @JsonProperty("rowNum")
+    private Integer rowNum;
+
+    @JsonProperty("colNum")
+    private Integer colNum;
+
     // 默认构造函数
     public Seat() {
         this.type = Type.NORMAL;
@@ -209,6 +215,22 @@ public class Seat {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getRowNum() {
+        return rowNum;
+    }
+
+    public void setRowNum(Integer rowNum) {
+        this.rowNum = rowNum;
+    }
+
+    public Integer getColNum() {
+        return colNum;
+    }
+
+    public void setColNum(Integer colNum) {
+        this.colNum = colNum;
     }
 
     // 工具方法
